@@ -44,15 +44,15 @@ $$ Rules
 
 ### Comments
 1. It doesn't look like the expected game. The boat and fish doesn't expand over multiple cell
-2. The funcationality seems broke
+2. The functionality seems broke
 
 
 ## Instruction List 4
 
 ### Instructions
 1. Play the game. See how it works
-2. Then clone the funcationality
-3. Your work is not good and even the funcationality seems broke
+2. Then clone the functionality
+3. Your work is not good and even the functionality seems broke
 
 ### Comments
 1. It created ladder and snake
@@ -74,6 +74,7 @@ $$ Rules
 2. Without this, the logic seems unpredictable.
 3. For example: When player one reaches to square 47, it goes to 84. but how?
 
+
 ## Instruction List 6
 
 ### Instructions
@@ -86,6 +87,7 @@ $$ Rules
 1. Seems it is understanding the goal. However. the boat and fish doesn't look good
 2. It kept the icons in cells and Created lines between those cells to connect them.
 
+
 ## Instruction List 7
 
 ### Instructions
@@ -95,3 +97,53 @@ $$ Rules
 4. And there should have option to view the history/stats of each move for each game. However, it shouldn't occupy the page view. It should only show, when history button is clicked
 5. And, when the website reloads, the game starts from start. It should persist the state.
 6. If one want to reset, he should press the new game
+
+### Comments
+1. The design is better. Though the fish and boat doesn't look like anything to the real fish and boat. Just tiny icons on start and end of the cell of the connecting line
+2. Added history which seems ok but need some update
+
+
+## Instruction List 8
+
+### Instructions
+1. When rolled 1, it should give option for extra turn instead of 6
+2. There should have option to update player's name
+3. In history, there should have timestamp
+4. In history, the latest move will show first instead of last
+5. It is not clear, what the the clear stats does. There should have some instructions at bottom
+6. Before clear stats, confirmations should be asked
+7. The clear stats, button color should be different
+8. Before starting a new game while a game is running, there should have confirmation option
+9. If fish eats, play some fish bite sound for little time
+10. If player finds ladder, play some joy sound for little time
+11. If someone wins, there should have party sound for some time
+12. Ensure the game is responsive and mobile friendly
+13. In mobile view, the doll dice should be easily accessible
+
+### Comments
+1. Added some functionality but the design became worse
+
+
+## instruction List 9
+
+### Instructions
+1. Instead of native confirmation popup, design something which looks good
+2. It is a game, so design should be attractive and addictive
+3. The thick design doesn't look that good. The number is hard to read
+4. And in mobile UI, the number of cells are not understandable.
+5. And did u checked instruction list 8 carefully. It stated that, When rolled 1, it should give option for extra turn instead of 6
+
+### Comments
+1. The design is better but not as expected
+2. The mobile view needs to be improved
+
+
+## Instruction List 10
+1. The connecting line is ok. however, the icon circle looks big.
+2. Wished that, the fish and boat will look better resembling actual fish and boat with interactivity
+3. The player's name can be changed. however, the changes reflect on history
+5. On reload, the player names go away. It should be persistent
+4. The mobile UI need to better. For mobile UI, the roll dice option should be close to the board and at bottom. So, it can be easily accessible and players can play without scrolling
+5. I want to make a mobile app from this using webview. So ensure it would work on that case
+6. The design should be sleek, modern, clean and addictive with nice animations
+7. It should be simple for play from child to old

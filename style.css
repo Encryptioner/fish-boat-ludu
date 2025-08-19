@@ -7,19 +7,34 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
     min-height: 100vh;
     padding: 20px;
     color: #333;
 }
 
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 .game-container {
     max-width: 1200px;
     margin: 0 auto;
-    background: white;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8);
     overflow: hidden;
+    position: relative;
+    animation: containerGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes containerGlow {
+    0% { box-shadow: 0 25px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8), 0 0 20px rgba(102, 126, 234, 0.3); }
+    100% { box-shadow: 0 25px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.8), 0 0 30px rgba(118, 75, 162, 0.4); }
 }
 
 /* Header */
@@ -78,6 +93,12 @@ body {
     border-color: #ff9800;
     transform: scale(1.02);
     box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+    animation: activePlayerPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes activePlayerPulse {
+    0% { box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3); }
+    100% { box-shadow: 0 8px 25px rgba(255, 152, 0, 0.5); }
 }
 
 .player-token {
@@ -100,6 +121,19 @@ body {
     font-size: 1.1em;
     margin-bottom: 5px;
     color: #2d3748;
+}
+
+.player-name {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.player-name:hover {
+    background: rgba(66, 153, 225, 0.1);
+    color: #3182ce;
+    transform: scale(1.02);
 }
 
 .player-details p {
@@ -220,6 +254,15 @@ body {
     transform: translateY(-2px);
 }
 
+#clear-stats {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+}
+
+#clear-stats:hover {
+    background: linear-gradient(135deg, #e53e3e, #f56565);
+    transform: translateY(-2px);
+}
+
 /* Board container */
 .board-container {
     display: flex;
@@ -248,10 +291,12 @@ body {
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    font-size: 14px;
-    color: #2d3748;
+    font-size: 16px;
+    color: #1a202c;
     position: relative;
     transition: all 0.2s ease;
+    text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .square:hover {
@@ -269,12 +314,31 @@ body {
     background: linear-gradient(135deg, #ed8936, #dd6b20);
     color: white;
     font-weight: bold;
-    animation: glow 2s ease-in-out infinite;
+    animation: finishGlow 2s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
 }
 
-@keyframes glow {
-    0%, 100% { box-shadow: 0 0 5px rgba(237, 137, 54, 0.5); }
-    50% { box-shadow: 0 0 15px rgba(237, 137, 54, 0.8); }
+.square.finish::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shine 3s infinite;
+}
+
+@keyframes finishGlow {
+    0%, 100% { box-shadow: 0 0 8px rgba(237, 137, 54, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(237, 137, 54, 0.9), inset 0 0 12px rgba(255, 255, 255, 0.3); }
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
 }
 
 /* Fish and boat visual elements spanning multiple cells */
@@ -300,18 +364,25 @@ body {
 .fish-line {
     fill: none;
     stroke: #dc2626;
-    stroke-width: 3;
+    stroke-width: 4;
     stroke-linecap: round;
-    opacity: 0.85;
+    opacity: 0.8;
     filter: drop-shadow(1px 1px 3px rgba(220,38,38,0.4));
+    stroke-dasharray: 6, 3;
+    animation: fishSwim 3s ease-in-out infinite;
+}
+
+@keyframes fishSwim {
+    0%, 100% { stroke-dashoffset: 0; }
+    50% { stroke-dashoffset: 12; }
 }
 
 .boat-line {
     fill: none;
     stroke: #92400e;
-    stroke-width: 3;
+    stroke-width: 4;
     stroke-linecap: round;
-    opacity: 0.9;
+    opacity: 0.85;
     filter: drop-shadow(1px 1px 3px rgba(146,64,14,0.4));
 }
 
@@ -321,19 +392,44 @@ body {
     stroke-width: 2;
     stroke-linecap: round;
     opacity: 0.8;
+    filter: drop-shadow(1px 1px 2px rgba(146,64,14,0.3));
 }
 
 .fish-head, .fish-tail, .boat-bottom, .boat-top {
     position: absolute;
-    font-size: 24px;
+    font-size: 32px;
     transform: translate(-50%, -50%);
     z-index: 60;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
     animation: bounce 3s ease-in-out infinite;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px;
+    border: 2px solid transparent;
 }
 
 .fish-head {
+    font-size: 36px;
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    border-color: #dc2626;
+}
+
+.fish-tail {
     font-size: 28px;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    border-color: #3b82f6;
+}
+
+.boat-bottom {
+    font-size: 32px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-color: #f59e0b;
+}
+
+.boat-top {
+    font-size: 34px;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border-color: #10b981;
 }
 
 .fish-head, .fish-tail {
@@ -618,6 +714,99 @@ body {
     }
 }
 
+/* Custom Modal Styles */
+.confirmation-modal, .input-modal {
+    max-width: 400px;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 3px solid #4CAF50;
+}
+
+.confirmation-buttons, .input-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.btn-confirm {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
+}
+
+.btn-confirm:hover {
+    background: linear-gradient(135deg, #38a169, #48bb78);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(72, 187, 120, 0.4);
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #f56565, #e53e3e);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.3);
+}
+
+.btn-cancel:hover {
+    background: linear-gradient(135deg, #e53e3e, #f56565);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(245, 101, 101, 0.4);
+}
+
+.custom-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1em;
+    margin: 15px 0;
+    transition: all 0.3s ease;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+#confirmation-message, #input-message {
+    font-size: 1.1em;
+    color: #2d3748;
+    text-align: center;
+    line-height: 1.6;
+}
+
+/* Bottom info */
+.bottom-info {
+    background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+    padding: 15px 20px;
+    border-top: 2px solid #38b2ac;
+    text-align: center;
+}
+
+.bottom-info p {
+    margin: 5px 0;
+    color: #2d3748;
+    font-size: 1em;
+}
+
+.bottom-info strong {
+    color: #1a202c;
+}
+
 /* Instructions */
 .instructions {
     background: #f7fafc;
@@ -641,7 +830,7 @@ body {
     color: #4a5568;
 }
 
-/* Responsive design */
+/* Enhanced responsive design */
 @media (max-width: 768px) {
     .game-content {
         grid-template-columns: 1fr;
@@ -654,10 +843,14 @@ body {
         max-width: 500px;
         height: auto;
         aspect-ratio: 1;
+        padding: 10px;
     }
     
     .square {
-        font-size: 12px;
+        font-size: 14px;
+        font-weight: 900;
+        border-width: 2px;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
     }
     
     .game-header h1 {
@@ -668,11 +861,39 @@ body {
         flex-direction: row;
         justify-content: space-around;
     }
+    
+    /* Make dice area more prominent on mobile */
+    .dice-area {
+        background: linear-gradient(135deg, #f7fafc, #edf2f7);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin: 10px 0;
+    }
+    
+    .dice {
+        font-size: 5em;
+        padding: 20px;
+        margin: 10px 0;
+        background: linear-gradient(135deg, #ffffff, #f8fafc);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .roll-button {
+        font-size: 1.2em;
+        padding: 18px 35px;
+        margin-top: 15px;
+    }
+    
+    .fish-head, .fish-tail, .boat-bottom, .boat-top {
+        font-size: 20px;
+        padding: 4px;
+    }
 }
 
 @media (max-width: 480px) {
     body {
-        padding: 10px;
+        padding: 8px;
     }
     
     .game-content {
@@ -680,10 +901,43 @@ body {
     }
     
     .game-board {
-        max-width: 400px;
+        max-width: 380px;
+        padding: 8px;
     }
     
     .square {
-        font-size: 10px;
+        font-size: 12px;
+        font-weight: 900;
+        border-width: 2px;
+        border-radius: 3px;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+    
+    .game-header h1 {
+        font-size: 1.8em;
+    }
+    
+    .dice {
+        font-size: 4.5em;
+        padding: 15px;
+    }
+    
+    .roll-button {
+        font-size: 1.1em;
+        padding: 16px 30px;
+    }
+    
+    .fish-head, .fish-tail, .boat-bottom, .boat-top {
+        font-size: 18px;
+        padding: 3px;
+    }
+    
+    .fish-line, .boat-line {
+        stroke-width: 3;
+    }
+    
+    .boat-rung {
+        stroke-width: 1.5;
     }
 }

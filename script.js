@@ -3,8 +3,8 @@ class FishBoatLaddersGame {
         // Game state
         this.currentPlayer = 1;
         this.players = {
-            1: { position: 1, piece: null },
-            2: { position: 1, piece: null }
+            1: { position: 1, piece: null, name: 'Player 1' },
+            2: { position: 1, piece: null, name: 'Player 2' }
         };
         this.isGameOver = false;
         this.isRolling = false;
@@ -30,6 +30,9 @@ class FishBoatLaddersGame {
 
         // Load saved game state
         this.loadGameState();
+
+        // Initialize audio context for sound effects
+        this.initializeAudio();
 
         // Initialize the game
         this.initialize();
@@ -324,8 +327,8 @@ class FishBoatLaddersGame {
             dice.textContent = this.getDiceEmoji(roll);
             diceValue.textContent = `Rolled: ${roll}`;
 
-            // Check if player gets another turn (rolled 6)
-            this.canRollAgain = (roll === 6);
+            // Check if player gets another turn (rolled 1)
+            this.canRollAgain = (roll === 1);
 
             // Move the player
             this.movePlayer(roll);
@@ -402,6 +405,9 @@ class FishBoatLaddersGame {
                 🌊 Better luck next time!
             `, 4000);
 
+            // Play fish bite sound
+            this.playFishBiteSound();
+
             // Animate fish movement
             setTimeout(() => {
                 player.piece.classList.add('moving');
@@ -435,6 +441,9 @@ class FishBoatLaddersGame {
                 The friendly boat lifts them up ${moveUp} squares to ${boatTop}!<br/>
                 🌟 What a lucky break!
             `, 4000);
+
+            // Play boat rescue sound
+            this.playBoatRescueSound();
 
             // Animate boat movement
             setTimeout(() => {
@@ -473,7 +482,7 @@ class FishBoatLaddersGame {
         if (!this.canRollAgain) {
             this.switchPlayer();
         } else {
-            this.updateGameStatus(`🎲 Player ${this.currentPlayer} rolled a 6! Roll again!`);
+            this.updateGameStatus(`🎲 Player ${this.currentPlayer} rolled a 1! Roll again!`);
             this.canRollAgain = false;
         }
     }
@@ -489,6 +498,9 @@ class FishBoatLaddersGame {
     handleGameWin() {
         this.isGameOver = true;
         
+        // Play victory sound
+        this.playWinSound();
+        
         // Update statistics
         this.stats[`player${this.currentPlayer}Wins`]++;
         this.stats.totalGames++;
@@ -499,7 +511,7 @@ class FishBoatLaddersGame {
         
         // Show winner message
         const statusElement = document.getElementById('game-status');
-        statusElement.textContent = `🎉 Player ${this.currentPlayer} WINS! 🏆 Congratulations!`;
+        statusElement.textContent = `🎉 ${this.players[this.currentPlayer].name} WINS! 🏆 Congratulations!`;
         statusElement.classList.add('winner');
         
         // Save final game state
@@ -525,7 +537,7 @@ class FishBoatLaddersGame {
 
         // Update turn indicator
         if (!this.isGameOver) {
-            document.getElementById('current-turn').textContent = `Player ${this.currentPlayer}'s Turn`;
+            document.getElementById('current-turn').textContent = `${this.players[this.currentPlayer].name}'s Turn`;
         } else {
             document.getElementById('current-turn').textContent = `Game Over!`;
         }
@@ -549,6 +561,24 @@ class FishBoatLaddersGame {
     }
 
     newGame() {
+        // Show confirmation if game is in progress
+        if (!this.isGameOver && (this.players[1].position > 1 || this.players[2].position > 1 || this.gameHistory.length > 0)) {
+            this.showConfirmDialog(
+                '🎮 New Game Confirmation',
+                'A game is currently in progress. Are you sure you want to start a new game? All progress will be lost.',
+                (confirmed) => {
+                    if (confirmed) {
+                        this.resetGame();
+                    }
+                }
+            );
+            return;
+        }
+
+        this.resetGame();
+    }
+
+    resetGame() {
         // Reset game state
         this.currentPlayer = 1;
         this.players[1].position = 1;
@@ -581,14 +611,29 @@ class FishBoatLaddersGame {
     }
 
     clearStats() {
-        this.stats = {
-            player1Wins: 0,
-            player2Wins: 0,
-            totalGames: 0
-        };
-        this.saveGameStats();
-        this.updateDisplay();
-        this.updateGameStatus('📊 Game statistics cleared!');
+        this.showConfirmDialog(
+            '📊 Clear Statistics',
+            'Are you sure you want to clear all game statistics? This action cannot be undone and will reset all win records.',
+            (confirmed) => {
+                if (confirmed) {
+                    this.stats = {
+                        player1Wins: 0,
+                        player2Wins: 0,
+                        totalGames: 0
+                    };
+                    this.saveGameStats();
+                    this.updateDisplay();
+                    this.updateGameStatus('📊 Game statistics cleared! All win records have been reset.');
+                    
+                    // Show notification
+                    this.showNotification(`
+                        📊 <strong>STATISTICS CLEARED!</strong><br/>
+                        All game statistics have been reset.<br/>
+                        Win counts are now back to zero.
+                    `, 3000);
+                }
+            }
+        );
     }
 
     loadGameStats() {
@@ -616,13 +661,15 @@ class FishBoatLaddersGame {
     }
 
     recordMove(player, diceRoll, fromSquare, toSquare, specialAction = null) {
+        const now = new Date();
         const move = {
             player: player,
             roll: diceRoll,
             from: fromSquare,
             to: toSquare,
             special: specialAction,
-            timestamp: new Date().toLocaleTimeString()
+            timestamp: now.toLocaleTimeString(),
+            fullTimestamp: now.toLocaleString()
         };
         this.gameHistory.push(move);
     }
@@ -656,7 +703,10 @@ class FishBoatLaddersGame {
         }
 
         let historyHTML = '';
-        this.gameHistory.forEach((move, index) => {
+        // Show latest moves first by reversing the array
+        const reversedHistory = [...this.gameHistory].reverse();
+        
+        reversedHistory.forEach((move, index) => {
             const isSpecial = move.special !== null;
             const specialClass = isSpecial ? ' special' : '';
             
@@ -666,10 +716,10 @@ class FishBoatLaddersGame {
             if (move.special) {
                 if (move.special.type === 'shark') {
                     actionText = `Rolled ${move.roll}, landed on shark at ${move.to}`;
-                    resultText = `Dragged down to ${move.special.newPosition}`;
+                    resultText = `🦈 Dragged down to ${move.special.newPosition}`;
                 } else if (move.special.type === 'boat') {
                     actionText = `Rolled ${move.roll}, found boat at ${move.to}`;
-                    resultText = `Sailed up to ${move.special.newPosition}`;
+                    resultText = `⛵ Sailed up to ${move.special.newPosition}`;
                 }
             }
 
@@ -697,8 +747,8 @@ class FishBoatLaddersGame {
         const gameState = {
             currentPlayer: this.currentPlayer,
             players: {
-                1: { position: this.players[1].position },
-                2: { position: this.players[2].position }
+                1: { position: this.players[1].position, name: this.players[1].name },
+                2: { position: this.players[2].position, name: this.players[2].name }
             },
             isGameOver: this.isGameOver,
             canRollAgain: this.canRollAgain,
@@ -720,17 +770,19 @@ class FishBoatLaddersGame {
                 this.currentPlayer = gameState.currentPlayer;
                 this.players[1].position = gameState.players[1].position;
                 this.players[2].position = gameState.players[2].position;
+                this.players[1].name = gameState.players[1].name || 'Player 1';
+                this.players[2].name = gameState.players[2].name || 'Player 2';
                 this.isGameOver = gameState.isGameOver || false;
                 this.canRollAgain = gameState.canRollAgain || false;
                 this.gameHistory = gameState.gameHistory || [];
                 
                 // If there's a saved game, show a restore message
-                if (gameState.players[1].position > 1 || gameState.players[2].position > 1) {
+                if (gameState.players[1].position > 1 || gameState.players[2].position > 1 || gameState.gameHistory.length > 0) {
                     setTimeout(() => {
                         this.showNotification(`
                             🎮 <strong>GAME RESTORED!</strong><br/>
                             Your previous game has been loaded.<br/>
-                            Continue playing or start a new game.
+                            Player ${this.currentPlayer} is up next. Continue playing or start a new game.
                         `, 5000);
                     }, 500);
                 }
@@ -747,9 +799,190 @@ class FishBoatLaddersGame {
             console.error('Error clearing game state:', e);
         }
     }
+
+    editPlayerName(playerNumber) {
+        const currentName = this.players[playerNumber].name;
+        this.showInputDialog(
+            '✏️ Edit Player Name',
+            `Enter a new name for ${currentName}:`,
+            currentName,
+            (newName) => {
+                if (newName && newName !== currentName) {
+                    this.players[playerNumber].name = newName;
+                    document.getElementById(`player${playerNumber}-name`).textContent = newName;
+                    
+                    // Update turn indicator if it's showing this player
+                    if (this.currentPlayer === playerNumber) {
+                        document.getElementById('current-turn').textContent = `${this.players[playerNumber].name}'s Turn`;
+                    }
+                    
+                    // Save the updated state
+                    this.saveGameState();
+                    
+                    // Show notification
+                    this.showNotification(`
+                        ✏️ <strong>NAME UPDATED!</strong><br/>
+                        Player ${playerNumber} is now called "${newName}"
+                    `, 2000);
+                }
+            }
+        );
+    }
+
+    initializeAudio() {
+        // Simple audio context for sound effects using Web Audio API
+        this.audioContext = null;
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.log('Web Audio API not supported');
+        }
+    }
+
+    playSound(frequency, duration, type = 'sine') {
+        if (!this.audioContext) return;
+
+        try {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+            
+            oscillator.start(this.audioContext.currentTime);
+            oscillator.stop(this.audioContext.currentTime + duration);
+        } catch (e) {
+            console.log('Error playing sound:', e);
+        }
+    }
+
+    playFishBiteSound() {
+        // Play a sequence of descending notes for fish bite
+        this.playSound(400, 0.2, 'sawtooth');
+        setTimeout(() => this.playSound(300, 0.2, 'sawtooth'), 150);
+        setTimeout(() => this.playSound(200, 0.3, 'sawtooth'), 300);
+    }
+
+    playBoatRescueSound() {
+        // Play ascending notes for boat rescue (joyful)
+        this.playSound(300, 0.2, 'sine');
+        setTimeout(() => this.playSound(400, 0.2, 'sine'), 150);
+        setTimeout(() => this.playSound(500, 0.2, 'sine'), 300);
+        setTimeout(() => this.playSound(600, 0.3, 'sine'), 450);
+    }
+
+    playWinSound() {
+        // Play a victory fanfare
+        const notes = [523, 587, 659, 698, 784, 880]; // C, D, E, F, G, A
+        notes.forEach((note, index) => {
+            setTimeout(() => {
+                this.playSound(note, 0.4, 'triangle');
+            }, index * 200);
+        });
+    }
+
+    // Custom modal functions
+    showConfirmDialog(title, message, callback) {
+        const modal = document.getElementById('confirmation-modal');
+        const titleEl = document.getElementById('confirmation-title');
+        const messageEl = document.getElementById('confirmation-message');
+        const yesBtn = document.getElementById('confirm-yes');
+        const noBtn = document.getElementById('confirm-no');
+
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        modal.style.display = 'flex';
+
+        // Remove any existing event listeners
+        const newYesBtn = yesBtn.cloneNode(true);
+        const newNoBtn = noBtn.cloneNode(true);
+        yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+        noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+
+        // Add new event listeners
+        newYesBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            callback(true);
+        });
+
+        newNoBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            callback(false);
+        });
+
+        // Close on overlay click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                callback(false);
+            }
+        });
+    }
+
+    showInputDialog(title, message, defaultValue, callback) {
+        const modal = document.getElementById('input-modal');
+        const titleEl = document.getElementById('input-title');
+        const messageEl = document.getElementById('input-message');
+        const inputEl = document.getElementById('input-field');
+        const okBtn = document.getElementById('input-ok');
+        const cancelBtn = document.getElementById('input-cancel');
+
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        inputEl.value = defaultValue || '';
+        modal.style.display = 'flex';
+        
+        // Focus the input field
+        setTimeout(() => inputEl.focus(), 100);
+
+        // Remove any existing event listeners
+        const newOkBtn = okBtn.cloneNode(true);
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+        const handleOk = () => {
+            modal.style.display = 'none';
+            callback(inputEl.value.trim());
+        };
+
+        const handleCancel = () => {
+            modal.style.display = 'none';
+            callback(null);
+        };
+
+        // Add new event listeners
+        newOkBtn.addEventListener('click', handleOk);
+        newCancelBtn.addEventListener('click', handleCancel);
+
+        // Handle Enter key
+        inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                handleOk();
+            } else if (e.key === 'Escape') {
+                handleCancel();
+            }
+        });
+
+        // Close on overlay click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                handleCancel();
+            }
+        });
+    }
 }
+
+// Global game instance for onclick handlers
+let game;
 
 // Initialize the game when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    new FishBoatLaddersGame();
+    game = new FishBoatLaddersGame();
 });

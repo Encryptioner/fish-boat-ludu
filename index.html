@@ -19,7 +19,7 @@
                     <div class="player-card active" id="player1">
                         <div class="player-token player1-token"></div>
                         <div class="player-details">
-                            <h3>Player 1</h3>
+                            <h3 class="player-name" id="player1-name" onclick="game.editPlayerName(1)">Player 1</h3>
                             <p class="position">Square: 1</p>
                             <p class="wins">Wins: <span id="p1-wins">0</span></p>
                         </div>
@@ -28,7 +28,7 @@
                     <div class="player-card" id="player2">
                         <div class="player-token player2-token"></div>
                         <div class="player-details">
-                            <h3>Player 2</h3>
+                            <h3 class="player-name" id="player2-name" onclick="game.editPlayerName(2)">Player 2</h3>
                             <p class="position">Square: 1</p>
                             <p class="wins">Wins: <span id="p2-wins">0</span></p>
                         </div>
@@ -73,13 +73,18 @@
             </div>
         </div>
 
+        <div class="bottom-info" id="bottom-info">
+            <p><strong>🦈 Fish:</strong> Hungry sharks will drag you down to their tail when landed on!</p>
+            <p><strong>⛵ Boats:</strong> Friendly boat ladders will lift you up when discovered!</p>
+        </div>
+
         <div class="instructions">
             <h3>How to Play:</h3>
             <ul>
                 <li>🎲 Roll the dice to move your piece forward on the board</li>
                 <li>🦈 Sharks will drag you down to their tail - avoid them!</li>
                 <li>⛵ Boat ladders will carry you up to higher squares - use them!</li>
-                <li>⚅ Rolling a 6 gives you an extra turn</li>
+                <li>⚀ Rolling a 1 gives you an extra turn</li>
                 <li>🏆 First player to reach exactly square 100 wins!</li>
                 <li>🎯 You need the exact number to land on square 100</li>
             </ul>
@@ -122,6 +127,39 @@
                             <span class="stat-value" id="p2-total-wins">0</span>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div class="modal-overlay" id="confirmation-modal" style="display: none;">
+        <div class="modal-content confirmation-modal">
+            <div class="modal-header">
+                <h2 id="confirmation-title">Confirm Action</h2>
+            </div>
+            <div class="modal-body">
+                <p id="confirmation-message">Are you sure you want to proceed?</p>
+                <div class="confirmation-buttons">
+                    <button class="btn-confirm" id="confirm-yes">Yes</button>
+                    <button class="btn-cancel" id="confirm-no">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Input Modal -->
+    <div class="modal-overlay" id="input-modal" style="display: none;">
+        <div class="modal-content input-modal">
+            <div class="modal-header">
+                <h2 id="input-title">Enter Information</h2>
+            </div>
+            <div class="modal-body">
+                <p id="input-message">Please enter the required information:</p>
+                <input type="text" id="input-field" class="custom-input" placeholder="Enter here...">
+                <div class="input-buttons">
+                    <button class="btn-confirm" id="input-ok">OK</button>
+                    <button class="btn-cancel" id="input-cancel">Cancel</button>
                 </div>
             </div>
         </div>
