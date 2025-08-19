@@ -27,4 +27,44 @@ $$ Rules
 5. Full on browser game with all the functionality related for playing the board game
 6. The game  should be visually good, functional similar to the provided link without unnecessary functionlity which are not required for the game
 
- 
+### Comments
+1. The design and functionality got better but not like the shnake ladder
+2. I am concerned that if it could be get any better
+
+
+## Instruction List 3
+
+### Instructions
+1. It doesn't look like the game I expected. It doesn't resemblance the snake ladder game
+2. The fish and boat should be expanded on multiple square and be visually attractive
+3. It will be similar to the provided link earlier with the variation of snake replacing hingry large fish like shark. And ladder replacing the boat
+4. It will have the instructions and game logic similar to the link
+5. You may play the game there and understand the game functionality
+6. Then make a simplified clone  with the required variation by removing unnecessary clutter which are not necessary to play and understand the game
+
+### Comments
+1. It doesn't look like the expected game. The boat and fish doesn't expand over multiple cell
+2. The funcationality seems broke
+
+
+## Instruction List 4
+
+### Instructions
+1. Play the game. See how it works
+2. Then clone the funcationality
+3. Your work is not good and even the funcationality seems broke
+
+### Comments
+1. It created ladder and snake
+2. The ladder and snake is out of the board
+
+
+## Instruction List 5
+
+### Instructions
+1. There are snake and ladder instead of boat and fish
+2. Those are out of the board
+3. The dice positions are not according to the score
+4. The calucaltaiton seems off design seems novice
+5. Assess the requirement carefully. Follow the game from this link https://www.crazygames.com/game/snakes-and-ladders 
+6. I want professional, playable, shareable game
