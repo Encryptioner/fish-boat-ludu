@@ -51,6 +51,7 @@
                     <div class="action-buttons">
                         <button class="btn-secondary" id="new-game">🔄 New Game</button>
                         <button class="btn-secondary" id="clear-stats">📊 Clear Stats</button>
+                        <button class="btn-secondary" id="history-btn">📜 History</button>
                     </div>
                 </div>
             </div>
@@ -66,15 +67,63 @@
             🎮 Welcome! Click "ROLL DICE" to start playing. First player to reach square 100 wins!
         </div>
 
+        <div class="notification-area" id="notification-area" style="display: none;">
+            <div class="notification-content" id="notification-content">
+                <!-- Dynamic notification content -->
+            </div>
+        </div>
+
         <div class="instructions">
             <h3>How to Play:</h3>
             <ul>
-                <li>🎲 Roll the dice to move your piece forward</li>
-                <li>🐟 Fish will drag you down to their tail</li>
-                <li>🚤 Boats will carry you up to safety</li>
+                <li>🎲 Roll the dice to move your piece forward on the board</li>
+                <li>🦈 Sharks will drag you down to their tail - avoid them!</li>
+                <li>⛵ Boat ladders will carry you up to higher squares - use them!</li>
                 <li>⚅ Rolling a 6 gives you an extra turn</li>
-                <li>🏆 First to reach square 100 wins!</li>
+                <li>🏆 First player to reach exactly square 100 wins!</li>
+                <li>🎯 You need the exact number to land on square 100</li>
             </ul>
+        </div>
+    </div>
+
+    <!-- History Modal -->
+    <div class="modal-overlay" id="history-modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📜 Game History & Stats</h2>
+                <button class="modal-close" id="close-history">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-tabs">
+                    <button class="tab-button active" id="current-game-tab">Current Game</button>
+                    <button class="tab-button" id="overall-stats-tab">Overall Stats</button>
+                </div>
+                
+                <div class="tab-content" id="current-game-content">
+                    <h3>Move History</h3>
+                    <div class="move-history" id="move-history">
+                        <p class="no-moves">No moves yet. Start playing!</p>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="overall-stats-content" style="display: none;">
+                    <h3>Game Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Games:</span>
+                            <span class="stat-value" id="total-games">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Player 1 Wins:</span>
+                            <span class="stat-value" id="p1-total-wins">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Player 2 Wins:</span>
+                            <span class="stat-value" id="p2-total-wins">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

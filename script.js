@@ -25,6 +25,12 @@ class FishBoatLaddersGame {
         // Load game statistics
         this.stats = this.loadGameStats();
 
+        // Game history for current session
+        this.gameHistory = [];
+
+        // Load saved game state
+        this.loadGameState();
+
         // Initialize the game
         this.initialize();
     }
@@ -109,15 +115,11 @@ class FishBoatLaddersGame {
         const fishContainer = document.createElement('div');
         fishContainer.className = 'fish-container';
         
-        // Calculate fish path - simplified curved approach
-        const fishBody = document.createElement('div');
-        fishBody.className = 'fish-body';
-        
-        // Position fish body to span from head to tail
-        const startX = (headPos.col * 100 / 10) + 5; // percentage + offset
-        const startY = (headPos.row * 100 / 10) + 5;
-        const endX = (tailPos.col * 100 / 10) + 5;
-        const endY = (tailPos.row * 100 / 10) + 5;
+        // Position coordinates as percentages (each square is 10% of board)
+        const startX = (headPos.col * 10) + 5; // center of square
+        const startY = (headPos.row * 10) + 5;
+        const endX = (tailPos.col * 10) + 5;
+        const endY = (tailPos.row * 10) + 5;
         
         // Create SVG path for curved fish
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -126,35 +128,38 @@ class FishBoatLaddersGame {
         
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
-        // Create curved path
-        const midX = (startX + endX) / 2;
-        const midY = Math.min(startY, endY) - 8; // Curve upward
+        // Create more elegant curved path that looks like a snake body
+        const controlX1 = startX + (endX - startX) * 0.3;
+        const controlY1 = startY - 12;
+        const controlX2 = startX + (endX - startX) * 0.7;
+        const controlY2 = endY - 8;
         
-        const pathData = `M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`;
+        const pathData = `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${endX} ${endY}`;
         path.setAttribute('d', pathData);
         path.setAttribute('class', 'fish-line');
         
         svg.appendChild(path);
         
-        // Add fish head and tail markers
+        // Add fish head (bigger, more prominent)
         const fishHead = document.createElement('div');
         fishHead.className = 'fish-head';
         fishHead.style.left = `${startX}%`;
         fishHead.style.top = `${startY}%`;
-        fishHead.textContent = '🐟';
+        fishHead.innerHTML = '🦈'; // Use shark for head to make it more menacing
         
+        // Add fish tail (smaller)
         const fishTail = document.createElement('div');
         fishTail.className = 'fish-tail';
         fishTail.style.left = `${endX}%`;
         fishTail.style.top = `${endY}%`;
-        fishTail.textContent = '🐟';
+        fishTail.innerHTML = '🌊'; // Wave for tail end
         
         fishContainer.appendChild(svg);
         fishContainer.appendChild(fishHead);
         fishContainer.appendChild(fishTail);
         
-        // Add tooltip
-        fishContainer.title = `Fish! Head at ${head}, tail at ${tail}`;
+        // Add tooltip with clear explanation
+        fishContainer.title = `Shark! From square ${head} down to ${tail}`;
         
         board.appendChild(fishContainer);
     }
@@ -167,18 +172,18 @@ class FishBoatLaddersGame {
         const boatContainer = document.createElement('div');
         boatContainer.className = 'boat-container';
         
-        // Position boat ladder to span from bottom to top
-        const startX = (bottomPos.col * 100 / 10) + 5;
-        const startY = (bottomPos.row * 100 / 10) + 5;
-        const endX = (topPos.col * 100 / 10) + 5;
-        const endY = (topPos.row * 100 / 10) + 5;
+        // Position coordinates as percentages
+        const startX = (bottomPos.col * 10) + 5;
+        const startY = (bottomPos.row * 10) + 5;
+        const endX = (topPos.col * 10) + 5;
+        const endY = (topPos.row * 10) + 5;
         
-        // Create SVG for straight ladder-like path
+        // Create SVG for ladder-like boat path
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('class', 'boat-path');
         svg.setAttribute('viewBox', '0 0 100 100');
         
-        // Main ladder line
+        // Main boat/ladder line (thicker)
         const mainLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         mainLine.setAttribute('x1', startX);
         mainLine.setAttribute('y1', startY);
@@ -188,19 +193,19 @@ class FishBoatLaddersGame {
         
         svg.appendChild(mainLine);
         
-        // Add ladder rungs
+        // Add ladder rungs for better visual
         const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
-        const rungs = Math.floor(distance / 8); // One rung every 8 units
+        const rungs = Math.max(2, Math.floor(distance / 12)); // Fewer but more visible rungs
         
-        for (let i = 1; i < rungs; i++) {
-            const ratio = i / rungs;
+        for (let i = 1; i <= rungs; i++) {
+            const ratio = i / (rungs + 1);
             const rungX = startX + (endX - startX) * ratio;
             const rungY = startY + (endY - startY) * ratio;
             
             // Create perpendicular rung
             const rung = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             const angle = Math.atan2(endY - startY, endX - startX) + Math.PI / 2;
-            const rungLength = 3;
+            const rungLength = 4; // Longer rungs
             
             rung.setAttribute('x1', rungX - Math.cos(angle) * rungLength);
             rung.setAttribute('y1', rungY - Math.sin(angle) * rungLength);
@@ -211,25 +216,25 @@ class FishBoatLaddersGame {
             svg.appendChild(rung);
         }
         
-        // Add boat markers
+        // Add boat markers with better emojis
         const boatBottom = document.createElement('div');
         boatBottom.className = 'boat-bottom';
         boatBottom.style.left = `${startX}%`;
         boatBottom.style.top = `${startY}%`;
-        boatBottom.textContent = '🚤';
+        boatBottom.innerHTML = '🚢'; // Ship at bottom
         
         const boatTop = document.createElement('div');
         boatTop.className = 'boat-top';
         boatTop.style.left = `${endX}%`;
         boatTop.style.top = `${endY}%`;
-        boatTop.textContent = '⛵';
+        boatTop.innerHTML = '⛵'; // Sailboat at top
         
         boatContainer.appendChild(svg);
         boatContainer.appendChild(boatBottom);
         boatContainer.appendChild(boatTop);
         
-        // Add tooltip
-        boatContainer.title = `Boat! Bottom at ${bottom}, top at ${top}`;
+        // Add tooltip with clear explanation
+        boatContainer.title = `Boat Ladder! From square ${bottom} up to ${top}`;
         
         board.appendChild(boatContainer);
     }
@@ -278,6 +283,19 @@ class FishBoatLaddersGame {
         // Game control events
         document.getElementById('new-game').addEventListener('click', () => this.newGame());
         document.getElementById('clear-stats').addEventListener('click', () => this.clearStats());
+        document.getElementById('history-btn').addEventListener('click', () => this.showHistoryModal());
+        
+        // History modal events
+        document.getElementById('close-history').addEventListener('click', () => this.hideHistoryModal());
+        document.getElementById('current-game-tab').addEventListener('click', () => this.showHistoryTab('current-game'));
+        document.getElementById('overall-stats-tab').addEventListener('click', () => this.showHistoryTab('overall-stats'));
+        
+        // Close modal when clicking outside
+        document.getElementById('history-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'history-modal') {
+                this.hideHistoryModal();
+            }
+        });
 
         // Handle window resize to reposition pieces
         window.addEventListener('resize', () => {
@@ -328,7 +346,11 @@ class FishBoatLaddersGame {
 
     movePlayer(steps) {
         const player = this.players[this.currentPlayer];
+        const oldPosition = player.position;
         const newPosition = player.position + steps;
+
+        // Record the move
+        this.recordMove(this.currentPlayer, steps, oldPosition, newPosition);
 
         // Check if player would exceed 100
         if (newPosition > 100) {
@@ -369,32 +391,61 @@ class FishBoatLaddersGame {
         // Check if landed on fish (like snake head)
         if (this.fishPositions[position]) {
             const fishTail = this.fishPositions[position];
-            this.updateGameStatus(`🐟 Player ${this.currentPlayer} caught by a fish! Swimming down to square ${fishTail}!`);
+            this.updateGameStatus(`🦈 Oh no! Player ${this.currentPlayer} got caught by a shark! Dragged down to square ${fishTail}!`);
+            
+            // Show detailed notification
+            const moveDown = position - fishTail;
+            this.showNotification(`
+                🦈 <strong>SHARK ATTACK!</strong><br/>
+                Player ${this.currentPlayer} landed on square ${position}<br/>
+                The hungry shark drags them down ${moveDown} squares to ${fishTail}!<br/>
+                🌊 Better luck next time!
+            `, 4000);
 
             // Animate fish movement
             setTimeout(() => {
                 player.piece.classList.add('moving');
                 setTimeout(() => {
                     player.position = fishTail;
+                    // Record the special move
+                    this.gameHistory[this.gameHistory.length - 1].special = {
+                        type: 'shark',
+                        newPosition: fishTail
+                    };
                     this.updatePlayerPositions();
                     this.updateDisplay();
                     player.piece.classList.remove('moving');
 
                     // Continue turn logic
                     this.endTurn();
+                    this.saveGameState();
                 }, 600);
             }, 1000);
 
         // Check if landed on boat (like ladder bottom)
         } else if (this.boatPositions[position]) {
             const boatTop = this.boatPositions[position];
-            this.updateGameStatus(`🚤 Player ${this.currentPlayer} found a boat! Sailing up to square ${boatTop}!`);
+            this.updateGameStatus(`⛵ Great! Player ${this.currentPlayer} found a boat ladder! Sailing up to square ${boatTop}!`);
+            
+            // Show detailed notification
+            const moveUp = boatTop - position;
+            this.showNotification(`
+                ⛵ <strong>BOAT RESCUE!</strong><br/>
+                Player ${this.currentPlayer} found a boat ladder on square ${position}<br/>
+                The friendly boat lifts them up ${moveUp} squares to ${boatTop}!<br/>
+                🌟 What a lucky break!
+            `, 4000);
 
             // Animate boat movement
             setTimeout(() => {
                 player.piece.classList.add('moving');
                 setTimeout(() => {
                     player.position = boatTop;
+                    // Record the special move
+                    this.gameHistory[this.gameHistory.length - 1].special = {
+                        type: 'boat',
+                        newPosition: boatTop
+                    };
                     this.updatePlayerPositions();
                     this.updateDisplay();
                     player.piece.classList.remove('moving');
@@ -407,12 +458,14 @@ class FishBoatLaddersGame {
 
                     // Continue turn logic
                     this.endTurn();
+                    this.saveGameState();
                 }, 600);
             }, 1000);
 
         } else {
             // No special square, just end turn
             this.endTurn();
+            this.saveGameState();
         }
     }
 
@@ -430,6 +483,7 @@ class FishBoatLaddersGame {
         this.canRollAgain = false;
         this.updateDisplay();
         this.updateGameStatus(`🎮 Player ${this.currentPlayer}'s turn to roll!`);
+        this.saveGameState();
     }
 
     handleGameWin() {
@@ -447,6 +501,9 @@ class FishBoatLaddersGame {
         const statusElement = document.getElementById('game-status');
         statusElement.textContent = `🎉 Player ${this.currentPlayer} WINS! 🏆 Congratulations!`;
         statusElement.classList.add('winner');
+        
+        // Save final game state
+        this.saveGameState();
     }
 
     updateDisplay() {
@@ -478,6 +535,19 @@ class FishBoatLaddersGame {
         document.getElementById('game-status').textContent = message;
     }
 
+    showNotification(message, duration = 3000) {
+        const notificationArea = document.getElementById('notification-area');
+        const notificationContent = document.getElementById('notification-content');
+        
+        notificationContent.innerHTML = message;
+        notificationArea.style.display = 'block';
+        
+        // Auto-hide after duration
+        setTimeout(() => {
+            notificationArea.style.display = 'none';
+        }, duration);
+    }
+
     newGame() {
         // Reset game state
         this.currentPlayer = 1;
@@ -486,6 +556,10 @@ class FishBoatLaddersGame {
         this.isGameOver = false;
         this.isRolling = false;
         this.canRollAgain = false;
+        this.gameHistory = []; // Clear move history
+
+        // Clear saved game state
+        this.clearGameState();
 
         // Reset UI elements
         document.getElementById('game-status').classList.remove('winner');
@@ -497,6 +571,13 @@ class FishBoatLaddersGame {
         this.updatePlayerPositions();
         this.updateDisplay();
         this.updateGameStatus('🎮 New game started! Player 1, click "ROLL DICE" to begin!');
+        
+        // Show notification
+        this.showNotification(`
+            🎮 <strong>NEW GAME STARTED!</strong><br/>
+            All progress has been reset.<br/>
+            Player 1, you're up first!
+        `, 3000);
     }
 
     clearStats() {
@@ -531,6 +612,139 @@ class FishBoatLaddersGame {
             localStorage.setItem('fishBoatGameStats', JSON.stringify(this.stats));
         } catch (e) {
             console.error('Error saving game stats:', e);
+        }
+    }
+
+    recordMove(player, diceRoll, fromSquare, toSquare, specialAction = null) {
+        const move = {
+            player: player,
+            roll: diceRoll,
+            from: fromSquare,
+            to: toSquare,
+            special: specialAction,
+            timestamp: new Date().toLocaleTimeString()
+        };
+        this.gameHistory.push(move);
+    }
+
+    showHistoryModal() {
+        this.updateHistoryDisplay();
+        this.updateStatsDisplay();
+        document.getElementById('history-modal').style.display = 'flex';
+    }
+
+    hideHistoryModal() {
+        document.getElementById('history-modal').style.display = 'none';
+    }
+
+    showHistoryTab(tabName) {
+        // Update tab buttons
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+        document.getElementById(`${tabName}-content`).style.display = 'block';
+    }
+
+    updateHistoryDisplay() {
+        const historyContainer = document.getElementById('move-history');
+        
+        if (this.gameHistory.length === 0) {
+            historyContainer.innerHTML = '<p class="no-moves">No moves yet. Start playing!</p>';
+            return;
+        }
+
+        let historyHTML = '';
+        this.gameHistory.forEach((move, index) => {
+            const isSpecial = move.special !== null;
+            const specialClass = isSpecial ? ' special' : '';
+            
+            let actionText = `Rolled ${move.roll}, moved from ${move.from} to ${move.to}`;
+            let resultText = '';
+            
+            if (move.special) {
+                if (move.special.type === 'shark') {
+                    actionText = `Rolled ${move.roll}, landed on shark at ${move.to}`;
+                    resultText = `Dragged down to ${move.special.newPosition}`;
+                } else if (move.special.type === 'boat') {
+                    actionText = `Rolled ${move.roll}, found boat at ${move.to}`;
+                    resultText = `Sailed up to ${move.special.newPosition}`;
+                }
+            }
+
+            historyHTML += `
+                <div class="move-item${specialClass}">
+                    <div class="move-details">
+                        <div class="move-player">Player ${move.player} - ${move.timestamp}</div>
+                        <div class="move-action">${actionText}</div>
+                        ${resultText ? `<div class="move-result">${resultText}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        historyContainer.innerHTML = historyHTML;
+    }
+
+    updateStatsDisplay() {
+        document.getElementById('total-games').textContent = this.stats.totalGames;
+        document.getElementById('p1-total-wins').textContent = this.stats.player1Wins;
+        document.getElementById('p2-total-wins').textContent = this.stats.player2Wins;
+    }
+
+    saveGameState() {
+        const gameState = {
+            currentPlayer: this.currentPlayer,
+            players: {
+                1: { position: this.players[1].position },
+                2: { position: this.players[2].position }
+            },
+            isGameOver: this.isGameOver,
+            canRollAgain: this.canRollAgain,
+            gameHistory: this.gameHistory
+        };
+
+        try {
+            localStorage.setItem('fishBoatGameState', JSON.stringify(gameState));
+        } catch (e) {
+            console.error('Error saving game state:', e);
+        }
+    }
+
+    loadGameState() {
+        const saved = localStorage.getItem('fishBoatGameState');
+        if (saved) {
+            try {
+                const gameState = JSON.parse(saved);
+                this.currentPlayer = gameState.currentPlayer;
+                this.players[1].position = gameState.players[1].position;
+                this.players[2].position = gameState.players[2].position;
+                this.isGameOver = gameState.isGameOver || false;
+                this.canRollAgain = gameState.canRollAgain || false;
+                this.gameHistory = gameState.gameHistory || [];
+                
+                // If there's a saved game, show a restore message
+                if (gameState.players[1].position > 1 || gameState.players[2].position > 1) {
+                    setTimeout(() => {
+                        this.showNotification(`
+                            🎮 <strong>GAME RESTORED!</strong><br/>
+                            Your previous game has been loaded.<br/>
+                            Continue playing or start a new game.
+                        `, 5000);
+                    }, 500);
+                }
+            } catch (e) {
+                console.error('Error loading game state:', e);
+            }
+        }
+    }
+
+    clearGameState() {
+        try {
+            localStorage.removeItem('fishBoatGameState');
+        } catch (e) {
+            console.error('Error clearing game state:', e);
         }
     }
 }

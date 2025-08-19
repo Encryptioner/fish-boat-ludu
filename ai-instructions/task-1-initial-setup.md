@@ -80,3 +80,18 @@ $$ Rules
 1. Check the current implementations http://127.0.0.1:5500/index.html
 2. It looks good, but the fish and boat should be over multiple cells where start and end point will indicate from where to where the player will go. Fish will eat and move to tail. Boat will take high ground
 3. Ensure the game follows the same rules and visuals like snake ladder game. Just snake and ladder will be replaced by fish and boat.
+4. I have added screenshots too for viewing the current design and expected design (ladder and snake will be replaced)
+
+### Comments
+1. Seems it is understanding the goal. However. the boat and fish doesn't look good
+2. It kept the icons in cells and Created lines between those cells to connect them.
+
+## Instruction List 7
+
+### Instructions
+1. Looks better however, I expected better design for boat and fish
+2. And the fish and boat seems too fat. Make them better looking
+3. Also, it would be good, when fish eats or player finds a boat, show necessary notifications at bottom. It doesn't say, what will happen when these tasks happen.
+4. And there should have option to view the history/stats of each move for each game. However, it shouldn't occupy the page view. It should only show, when history button is clicked
+5. And, when the website reloads, the game starts from start. It should persist the state.
+6. If one want to reset, he should press the new game
