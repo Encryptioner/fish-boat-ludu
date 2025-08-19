@@ -279,14 +279,41 @@ class FishBoatLaddersGame {
     }
 
     setupEventListeners() {
-        // Dice roll events
+        // Desktop dice roll events
         document.getElementById('dice').addEventListener('click', () => this.rollDice());
         document.getElementById('roll-button').addEventListener('click', () => this.rollDice());
         
-        // Game control events
+        // Mobile dice roll events
+        document.getElementById('mobile-dice').addEventListener('click', () => this.rollDice());
+        document.getElementById('mobile-roll-button').addEventListener('click', () => this.rollDice());
+        
+        // Desktop game control events
         document.getElementById('new-game').addEventListener('click', () => this.newGame());
         document.getElementById('clear-stats').addEventListener('click', () => this.clearStats());
         document.getElementById('history-btn').addEventListener('click', () => this.showHistoryModal());
+        
+        // Mobile menu events
+        document.getElementById('mobile-menu-button').addEventListener('click', () => this.showMobileMenu());
+        document.getElementById('mobile-menu-close').addEventListener('click', () => this.hideMobileMenu());
+        document.getElementById('mobile-menu-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'mobile-menu-overlay') {
+                this.hideMobileMenu();
+            }
+        });
+        
+        // Mobile menu items
+        document.getElementById('mobile-new-game').addEventListener('click', () => {
+            this.hideMobileMenu();
+            this.newGame();
+        });
+        document.getElementById('mobile-history-btn').addEventListener('click', () => {
+            this.hideMobileMenu();
+            this.showHistoryModal();
+        });
+        document.getElementById('mobile-clear-stats').addEventListener('click', () => {
+            this.hideMobileMenu();
+            this.clearStats();
+        });
         
         // History modal events
         document.getElementById('close-history').addEventListener('click', () => this.hideHistoryModal());
@@ -313,19 +340,31 @@ class FishBoatLaddersGame {
         const dice = document.getElementById('dice');
         const rollButton = document.getElementById('roll-button');
         const diceValue = document.getElementById('dice-value');
+        
+        // Mobile elements
+        const mobileDice = document.getElementById('mobile-dice');
+        const mobileRollButton = document.getElementById('mobile-roll-button');
+        const mobileDiceValue = document.getElementById('mobile-dice-value');
 
         // Disable controls during roll
         dice.classList.add('rolling');
+        mobileDice.classList.add('rolling');
         rollButton.disabled = true;
+        mobileRollButton.disabled = true;
         diceValue.textContent = 'Rolling...';
+        mobileDiceValue.textContent = 'Rolling...';
 
         // Simulate dice roll with delay
         setTimeout(() => {
             const roll = Math.floor(Math.random() * 6) + 1;
+            const diceEmoji = this.getDiceEmoji(roll);
             
             dice.classList.remove('rolling');
-            dice.textContent = this.getDiceEmoji(roll);
+            mobileDice.classList.remove('rolling');
+            dice.textContent = diceEmoji;
+            mobileDice.textContent = diceEmoji;
             diceValue.textContent = `Rolled: ${roll}`;
+            mobileDiceValue.textContent = `Rolled: ${roll}`;
 
             // Check if player gets another turn (rolled 1)
             this.canRollAgain = (roll === 1);
@@ -336,6 +375,7 @@ class FishBoatLaddersGame {
             // Re-enable controls
             setTimeout(() => {
                 rollButton.disabled = false;
+                mobileRollButton.disabled = false;
                 this.isRolling = false;
             }, 1000);
 
@@ -537,9 +577,12 @@ class FishBoatLaddersGame {
 
         // Update turn indicator
         if (!this.isGameOver) {
-            document.getElementById('current-turn').textContent = `${this.players[this.currentPlayer].name}'s Turn`;
+            const turnText = `${this.players[this.currentPlayer].name}'s Turn`;
+            document.getElementById('current-turn').textContent = turnText;
+            document.getElementById('mobile-current-turn').textContent = turnText;
         } else {
             document.getElementById('current-turn').textContent = `Game Over!`;
+            document.getElementById('mobile-current-turn').textContent = `Game Over!`;
         }
     }
 
@@ -596,6 +639,11 @@ class FishBoatLaddersGame {
         document.getElementById('dice').textContent = '🎲';
         document.getElementById('dice-value').textContent = 'Roll Dice';
         document.getElementById('roll-button').disabled = false;
+        
+        // Reset mobile UI elements
+        document.getElementById('mobile-dice').textContent = '🎲';
+        document.getElementById('mobile-dice-value').textContent = 'Roll Dice';
+        document.getElementById('mobile-roll-button').disabled = false;
 
         // Update positions and display
         this.updatePlayerPositions();
@@ -664,12 +712,13 @@ class FishBoatLaddersGame {
         const now = new Date();
         const move = {
             player: player,
+            playerName: this.players[player].name, // Store current player name
             roll: diceRoll,
             from: fromSquare,
             to: toSquare,
             special: specialAction,
-            timestamp: now.toLocaleTimeString(),
-            fullTimestamp: now.toLocaleString()
+            timestamp: now.toLocaleTimeString('en-US', { hour12: true }),
+            fullTimestamp: now.toLocaleString('en-US', { hour12: true })
         };
         this.gameHistory.push(move);
     }
@@ -723,10 +772,13 @@ class FishBoatLaddersGame {
                 }
             }
 
+            // Use current player name, fallback to stored name or default
+            const playerName = this.players[move.player]?.name || move.playerName || `Player ${move.player}`;
+            
             historyHTML += `
                 <div class="move-item${specialClass}">
                     <div class="move-details">
-                        <div class="move-player">Player ${move.player} - ${move.timestamp}</div>
+                        <div class="move-player">${playerName} - ${move.timestamp}</div>
                         <div class="move-action">${actionText}</div>
                         ${resultText ? `<div class="move-result">${resultText}</div>` : ''}
                     </div>
@@ -775,6 +827,10 @@ class FishBoatLaddersGame {
                 this.isGameOver = gameState.isGameOver || false;
                 this.canRollAgain = gameState.canRollAgain || false;
                 this.gameHistory = gameState.gameHistory || [];
+                
+                // Update player name displays
+                document.getElementById('player1-name').textContent = this.players[1].name;
+                document.getElementById('player2-name').textContent = this.players[2].name;
                 
                 // If there's a saved game, show a restore message
                 if (gameState.players[1].position > 1 || gameState.players[2].position > 1 || gameState.gameHistory.length > 0) {
@@ -976,6 +1032,22 @@ class FishBoatLaddersGame {
                 handleCancel();
             }
         });
+    }
+
+    showMobileMenu() {
+        const menuButton = document.getElementById('mobile-menu-button');
+        const menuOverlay = document.getElementById('mobile-menu-overlay');
+        
+        menuButton.classList.add('active');
+        menuOverlay.style.display = 'block';
+    }
+
+    hideMobileMenu() {
+        const menuButton = document.getElementById('mobile-menu-button');
+        const menuOverlay = document.getElementById('mobile-menu-overlay');
+        
+        menuButton.classList.remove('active');
+        menuOverlay.style.display = 'none';
     }
 }
 

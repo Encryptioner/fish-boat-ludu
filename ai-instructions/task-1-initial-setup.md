@@ -25,7 +25,7 @@ $$ Rules
 3. In my board game, it will be simple, interactive fish, boat, laddder game without other caos
 4. People can play and his data will be saved in localstorage of browser
 5. Full on browser game with all the functionality related for playing the board game
-6. The game  should be visually good, functional similar to the provided link without unnecessary functionlity which are not required for the game
+6. The game  should be visually good, functional similar to the provided link without unnecessary functionality which are not required for the game
 
 ### Comments
 1. The design and functionality got better but not like the shnake ladder
@@ -37,7 +37,7 @@ $$ Rules
 ### Instructions
 1. It doesn't look like the game I expected. It doesn't resemblance the snake ladder game
 2. The fish and boat should be expanded on multiple square and be visually attractive
-3. It will be similar to the provided link earlier with the variation of snake replacing hingry large fish like shark. And ladder replacing the boat
+3. It will be similar to the provided link earlier with the variation of snake replacing hungry large fish like shark. And ladder replacing the boat
 4. It will have the instructions and game logic similar to the link
 5. You may play the game there and understand the game functionality
 6. Then make a simplified clone  with the required variation by removing unnecessary clutter which are not necessary to play and understand the game
@@ -65,7 +65,7 @@ $$ Rules
 1. There are snake and ladder instead of boat and fish
 2. Those are out of the board
 3. The dice positions are not according to the score
-4. The calucaltaiton seems off design seems novice
+4. The calculation seems off design seems novice
 5. Assess the requirement carefully. Follow the game from this link https://www.crazygames.com/game/snakes-and-ladders 
 6. I want professional, playable, shareable game
 
@@ -139,6 +139,8 @@ $$ Rules
 
 
 ## Instruction List 10
+
+### Instructions
 1. The connecting line is ok. however, the icon circle looks big.
 2. Wished that, the fish and boat will look better resembling actual fish and boat with interactivity
 3. The player's name can be changed. however, the changes reflect on history
@@ -147,3 +149,48 @@ $$ Rules
 5. I want to make a mobile app from this using webview. So ensure it would work on that case
 6. The design should be sleek, modern, clean and addictive with nice animations
 7. It should be simple for play from child to old
+8. And in history, the timestamp should in 12 hour
+
+### Comments
+1. The design seems broke. It completely failed to design which could represent boat and fish as whole instead of connecting cells
+
+
+## Instruction List 11
+
+### Instructions
+1. Bring back the earlier design. Seems u broke existing design
+2. Just improve necessary functionality
+3. In mobile view, the Who's turn shows at top before buttons and roll shows at bottom after board. It is not good UX. The who's turn should show next to roll
+4. In mobile view, we don't need all those buttons. We may show the options like new game, clear stats or history under in hamburger menu
+5. Ensure the design looks good in both mobile and web
+
+### Comments
+1. It failed to bring back the old design. The UI looks odd.
+2. Seems it tried to make the boat as single items instead of connecting them
+
+
+## Instruction List 12
+
+### Instructions
+1. The design looks ugly. Don't try to connect the boat as a whole. Connect them as earlier. Bring back old design. 
+2. I'll share the old and current design for review and. Please fix your mistake
+
+### Comments
+1. It failed to read the screenshots which were present in desktop (mac)
+2. Later, moved them to project directory
+3. Seems the context are not much left (2 percent). It says that, it will auto compact. I've used around 2 session so far.
+4. The design was good till, instruction list 9. I should've make commit when the implementation is ok
+5. Also, it'd be better if I take screenshots after each instruction list implementation
+
+
+## Instruction List 13
+
+### Instructions
+1. It is not like earlier design. check git commit if necessary
+2. But ensure u bring back earlier design for board
+3. In current design, the fish, boat goes out of the board
+4. The design was good till instruction list 9, From instruction list 10, I just want to bring back old design
+
+### Comments
+1. I faced usage limit. It says: Claude usage limit reached. Your limit will reset at 2am (Asia/Dhaka)
+2. Will try updating design tomorrow

@@ -13,6 +13,12 @@ body {
     min-height: 100vh;
     padding: 20px;
     color: #333;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+    position: relative;
+    overflow-x: hidden;
 }
 
 @keyframes gradientShift {
@@ -43,6 +49,7 @@ body {
     color: white;
     text-align: center;
     padding: 20px;
+    position: relative;
 }
 
 .game-header h1 {
@@ -54,6 +61,145 @@ body {
 .game-subtitle {
     font-size: 1.1em;
     opacity: 0.9;
+}
+
+/* Mobile hamburger menu button */
+.mobile-menu-button {
+    display: none;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    flex-direction: column;
+    gap: 4px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.hamburger-line {
+    width: 24px;
+    height: 3px;
+    background: white;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-button.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.mobile-menu-button.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-button.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.mobile-menu-content {
+    position: absolute;
+    right: 20px;
+    top: 80px;
+    background: white;
+    border-radius: 15px;
+    min-width: 200px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideInRight 0.3s ease-out;
+}
+
+.mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.mobile-menu-header h3 {
+    margin: 0;
+    color: #2d3748;
+    font-size: 1.1em;
+}
+
+.mobile-menu-close {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #718096;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.mobile-menu-close:hover {
+    background: #f7fafc;
+}
+
+.mobile-menu-items {
+    padding: 10px 0;
+}
+
+.mobile-menu-item {
+    width: 100%;
+    padding: 15px 20px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    color: #2d3748;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.mobile-menu-item:hover {
+    background: #f7fafc;
+}
+
+.mobile-menu-item.danger {
+    color: #e53e3e;
+}
+
+.mobile-menu-item.danger:hover {
+    background: #fed7d7;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Game content layout */
@@ -210,13 +356,16 @@ body {
     background: linear-gradient(135deg, #48bb78, #38a169);
     color: white;
     border: none;
-    padding: 15px 30px;
-    border-radius: 25px;
-    font-size: 1.1em;
-    font-weight: bold;
+    padding: 18px 35px;
+    border-radius: 30px;
+    font-size: 1.3em;
+    font-weight: 900;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'Arial Black', 'Helvetica', sans-serif;
 }
 
 .roll-button:hover {
@@ -266,8 +415,101 @@ body {
 /* Board container */
 .board-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 20px;
+}
+
+/* Mobile dice area - hidden by default */
+.mobile-dice-area {
+    display: none;
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.mobile-turn-info {
+    background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+    padding: 12px 20px;
+    border-radius: 25px;
+    margin-bottom: 15px;
+    border: 2px solid #ff9800;
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+}
+
+.mobile-turn-info span {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #e65100;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.mobile-dice-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.mobile-dice {
+    font-size: 4em;
+    padding: 15px;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    border: 3px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 10px 0;
+}
+
+.mobile-dice:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.mobile-dice.rolling {
+    animation: diceRoll 0.6s ease-in-out infinite;
+}
+
+.mobile-dice-value {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+.mobile-roll-button {
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    border: none;
+    padding: 18px 40px;
+    border-radius: 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    width: 100%;
+    max-width: 250px;
+}
+
+.mobile-roll-button:hover {
+    background: linear-gradient(135deg, #38a169, #48bb78);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(72, 187, 120, 0.5);
+}
+
+.mobile-roll-button:disabled {
+    background: #a0aec0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 .game-board {
@@ -284,19 +526,20 @@ body {
 }
 
 .square {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 5px;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-weight: bold;
-    font-size: 16px;
+    font-weight: 900;
+    font-size: 18px;
     color: #1a202c;
     position: relative;
-    transition: all 0.2s ease;
-    text-shadow: 0.5px 0.5px 1px rgba(255, 255, 255, 0.8);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial Black', 'Helvetica', sans-serif;
 }
 
 .square:hover {
@@ -454,25 +697,29 @@ body {
     border: 2px solid white;
     z-index: 100;
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.8);
 }
 
 .game-piece.player1 {
     background: radial-gradient(circle, #e53e3e, #c53030);
+    border-color: #fed7d7;
 }
 
 .game-piece.player2 {
     background: radial-gradient(circle, #3182ce, #2c5282);
+    border-color: #bee3f8;
 }
 
 .game-piece.moving {
-    animation: pieceMove 0.6s ease-in-out;
+    animation: simplePieceMove 0.6s ease-in-out;
     z-index: 101;
+    transform: scale(1.2);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
-@keyframes pieceMove {
+@keyframes simplePieceMove {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.4); }
+    50% { transform: scale(1.3); }
 }
 
 /* Game status */
@@ -847,10 +1094,11 @@ body {
     }
     
     .square {
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 900;
-        border-width: 2px;
-        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
+        border-width: 3px;
+        text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
     }
     
     .game-header h1 {
@@ -862,27 +1110,29 @@ body {
         justify-content: space-around;
     }
     
-    /* Make dice area more prominent on mobile */
+    /* Hide desktop elements, show mobile elements */
     .dice-area {
-        background: linear-gradient(135deg, #f7fafc, #edf2f7);
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        margin: 10px 0;
+        display: none !important;
     }
     
-    .dice {
-        font-size: 5em;
-        padding: 20px;
-        margin: 10px 0;
-        background: linear-gradient(135deg, #ffffff, #f8fafc);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    .action-buttons {
+        display: none !important;
     }
     
-    .roll-button {
-        font-size: 1.2em;
-        padding: 18px 35px;
-        margin-top: 15px;
+    .turn-indicator {
+        display: none !important;
+    }
+    
+    .mobile-dice-area {
+        display: block !important;
+    }
+    
+    .mobile-menu-button {
+        display: flex !important;
+    }
+    
+    .board-container {
+        gap: 15px;
     }
     
     .fish-head, .fish-tail, .boat-bottom, .boat-top {
@@ -906,12 +1156,14 @@ body {
     }
     
     .square {
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 900;
-        border-width: 2px;
-        border-radius: 3px;
-        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        border-width: 3px;
+        border-radius: 8px;
+        text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.9);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        min-height: 32px;
+        min-width: 32px;
     }
     
     .game-header h1 {
