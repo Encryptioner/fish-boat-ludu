@@ -55,18 +55,6 @@ class FishBoatLaddersGame {
                 square.classList.add('finish');
             }
 
-            // Mark fish squares (like snake heads)
-            if (this.fishPositions[i]) {
-                square.classList.add('has-fish');
-                square.title = `Fish! Goes down to ${this.fishPositions[i]}`;
-            }
-
-            // Mark boat squares (like ladder bottoms)
-            if (this.boatPositions[i]) {
-                square.classList.add('has-boat');
-                square.title = `Boat! Goes up to ${this.boatPositions[i]}`;
-            }
-
             // Position squares correctly in snake pattern
             const row = Math.floor((i - 1) / 10);
             const col = (i - 1) % 10;
@@ -81,6 +69,169 @@ class FishBoatLaddersGame {
 
             board.appendChild(square);
         }
+
+        // Create visual fish and boat elements after squares are positioned
+        this.createFishAndBoatVisuals();
+    }
+
+    createFishAndBoatVisuals() {
+        const board = document.getElementById('game-board');
+
+        // Create fish visuals (like snakes)
+        Object.keys(this.fishPositions).forEach(head => {
+            const tail = this.fishPositions[head];
+            this.createFishPath(parseInt(head), parseInt(tail), board);
+        });
+
+        // Create boat visuals (like ladders)
+        Object.keys(this.boatPositions).forEach(bottom => {
+            const top = this.boatPositions[bottom];
+            this.createBoatPath(parseInt(bottom), parseInt(top), board);
+        });
+    }
+
+    getSquarePosition(squareNumber) {
+        const row = Math.floor((squareNumber - 1) / 10);
+        const col = (squareNumber - 1) % 10;
+        
+        // Adjust for zigzag pattern
+        const actualCol = row % 2 === 0 ? col : 9 - col;
+        const actualRow = 9 - row;
+        
+        return { row: actualRow, col: actualCol };
+    }
+
+    createFishPath(head, tail, board) {
+        const headPos = this.getSquarePosition(head);
+        const tailPos = this.getSquarePosition(tail);
+        
+        // Create fish container
+        const fishContainer = document.createElement('div');
+        fishContainer.className = 'fish-container';
+        
+        // Calculate fish path - simplified curved approach
+        const fishBody = document.createElement('div');
+        fishBody.className = 'fish-body';
+        
+        // Position fish body to span from head to tail
+        const startX = (headPos.col * 100 / 10) + 5; // percentage + offset
+        const startY = (headPos.row * 100 / 10) + 5;
+        const endX = (tailPos.col * 100 / 10) + 5;
+        const endY = (tailPos.row * 100 / 10) + 5;
+        
+        // Create SVG path for curved fish
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'fish-path');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        
+        // Create curved path
+        const midX = (startX + endX) / 2;
+        const midY = Math.min(startY, endY) - 8; // Curve upward
+        
+        const pathData = `M ${startX} ${startY} Q ${midX} ${midY} ${endX} ${endY}`;
+        path.setAttribute('d', pathData);
+        path.setAttribute('class', 'fish-line');
+        
+        svg.appendChild(path);
+        
+        // Add fish head and tail markers
+        const fishHead = document.createElement('div');
+        fishHead.className = 'fish-head';
+        fishHead.style.left = `${startX}%`;
+        fishHead.style.top = `${startY}%`;
+        fishHead.textContent = '🐟';
+        
+        const fishTail = document.createElement('div');
+        fishTail.className = 'fish-tail';
+        fishTail.style.left = `${endX}%`;
+        fishTail.style.top = `${endY}%`;
+        fishTail.textContent = '🐟';
+        
+        fishContainer.appendChild(svg);
+        fishContainer.appendChild(fishHead);
+        fishContainer.appendChild(fishTail);
+        
+        // Add tooltip
+        fishContainer.title = `Fish! Head at ${head}, tail at ${tail}`;
+        
+        board.appendChild(fishContainer);
+    }
+
+    createBoatPath(bottom, top, board) {
+        const bottomPos = this.getSquarePosition(bottom);
+        const topPos = this.getSquarePosition(top);
+        
+        // Create boat container
+        const boatContainer = document.createElement('div');
+        boatContainer.className = 'boat-container';
+        
+        // Position boat ladder to span from bottom to top
+        const startX = (bottomPos.col * 100 / 10) + 5;
+        const startY = (bottomPos.row * 100 / 10) + 5;
+        const endX = (topPos.col * 100 / 10) + 5;
+        const endY = (topPos.row * 100 / 10) + 5;
+        
+        // Create SVG for straight ladder-like path
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'boat-path');
+        svg.setAttribute('viewBox', '0 0 100 100');
+        
+        // Main ladder line
+        const mainLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        mainLine.setAttribute('x1', startX);
+        mainLine.setAttribute('y1', startY);
+        mainLine.setAttribute('x2', endX);
+        mainLine.setAttribute('y2', endY);
+        mainLine.setAttribute('class', 'boat-line');
+        
+        svg.appendChild(mainLine);
+        
+        // Add ladder rungs
+        const distance = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+        const rungs = Math.floor(distance / 8); // One rung every 8 units
+        
+        for (let i = 1; i < rungs; i++) {
+            const ratio = i / rungs;
+            const rungX = startX + (endX - startX) * ratio;
+            const rungY = startY + (endY - startY) * ratio;
+            
+            // Create perpendicular rung
+            const rung = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            const angle = Math.atan2(endY - startY, endX - startX) + Math.PI / 2;
+            const rungLength = 3;
+            
+            rung.setAttribute('x1', rungX - Math.cos(angle) * rungLength);
+            rung.setAttribute('y1', rungY - Math.sin(angle) * rungLength);
+            rung.setAttribute('x2', rungX + Math.cos(angle) * rungLength);
+            rung.setAttribute('y2', rungY + Math.sin(angle) * rungLength);
+            rung.setAttribute('class', 'boat-rung');
+            
+            svg.appendChild(rung);
+        }
+        
+        // Add boat markers
+        const boatBottom = document.createElement('div');
+        boatBottom.className = 'boat-bottom';
+        boatBottom.style.left = `${startX}%`;
+        boatBottom.style.top = `${startY}%`;
+        boatBottom.textContent = '🚤';
+        
+        const boatTop = document.createElement('div');
+        boatTop.className = 'boat-top';
+        boatTop.style.left = `${endX}%`;
+        boatTop.style.top = `${endY}%`;
+        boatTop.textContent = '⛵';
+        
+        boatContainer.appendChild(svg);
+        boatContainer.appendChild(boatBottom);
+        boatContainer.appendChild(boatTop);
+        
+        // Add tooltip
+        boatContainer.title = `Boat! Bottom at ${bottom}, top at ${top}`;
+        
+        board.appendChild(boatContainer);
     }
 
     createPlayerPieces() {

@@ -68,3 +68,15 @@ $$ Rules
 4. The calucaltaiton seems off design seems novice
 5. Assess the requirement carefully. Follow the game from this link https://www.crazygames.com/game/snakes-and-ladders 
 6. I want professional, playable, shareable game
+
+### Comments
+1. It made the design better but again fish and boat are showing only on a board cell, not over the whole board
+2. Without this, the logic seems unpredictable.
+3. For example: When player one reaches to square 47, it goes to 84. but how?
+
+## Instruction List 6
+
+### Instructions
+1. Check the current implementations http://127.0.0.1:5500/index.html
+2. It looks good, but the fish and boat should be over multiple cells where start and end point will indicate from where to where the player will go. Fish will eat and move to tail. Boat will take high ground
+3. Ensure the game follows the same rules and visuals like snake ladder game. Just snake and ladder will be replaced by fish and boat.
