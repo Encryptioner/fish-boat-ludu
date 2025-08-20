@@ -362,6 +362,9 @@ class FishBoatLaddersGame {
         if (this.isRolling || this.isGameOver) return;
 
         this.isRolling = true;
+        
+        // Play dice rolling sound
+        this.playDiceRollSound();
         const dice = document.getElementById('dice');
         const rollButton = document.getElementById('roll-button');
         const diceValue = document.getElementById('dice-value');
@@ -968,6 +971,15 @@ class FishBoatLaddersGame {
                 this.playSound(note, 0.4, 'triangle');
             }, index * 200);
         });
+    }
+
+    playDiceRollSound() {
+        // Play rolling dice sound - multiple quick clicks
+        for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+                this.playSound(150 + Math.random() * 100, 0.05, 'square');
+            }, i * 80);
+        }
     }
 
     // Custom modal functions
