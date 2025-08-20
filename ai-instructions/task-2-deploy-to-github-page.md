@@ -19,7 +19,7 @@
 2. The deployment guide needs some modification like update naming and remove unnecessary info
 
 
-### Instruction List 2
+## Instruction List 2
 
 ### Instructions
 1. Do I need a page deploy script similar to frontend-vue3-boilerplate?
@@ -30,3 +30,23 @@
 ### Comments
 1. It followed instructions
 2. I've added the claude settings file and gitignore
+3. I got error in Github's Action Tab
+
+
+## Instruction List 3
+
+### Instructions
+1. I got error while deployment. The error is
+```sh
+Annotations
+2 errors
+deploy
+Branch "release/prod" is not allowed to deploy to github-pages due to environment protection rules.
+deploy
+The deployment was rejected or didn't satisfy other protection rules.
+```
+2. How to fix this error?
+3. If any improvement is needed in codebase related to this, do it
+
+### Comments
+1. It did some change in deployment script. Let's try it
