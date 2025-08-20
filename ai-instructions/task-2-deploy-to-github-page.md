@@ -26,3 +26,7 @@
 2. And are there any security concern like exposing any secrets?
 3. Update the deploy.yml file name to be more accurate. Something like deploy-to-github-pages.yml. Ensure updating wherever it is mentioned
 4. I want the deployment when the code is pushed only to `release/prod` branch
+
+### Comments
+1. It followed instructions
+2. I've added the claude settings file and gitignore

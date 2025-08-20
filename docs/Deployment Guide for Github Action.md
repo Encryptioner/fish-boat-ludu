@@ -12,7 +12,7 @@ The game is deployed as a static website using GitHub Pages with automatic deplo
 
 Ensure your repository has the following structure:
 ```
-├── .github/workflows/deploy.yml
+├── .github/workflows/deploy-to-github-pages.yml
 ├── index.html
 ├── other file
 ├── another file
@@ -28,12 +28,12 @@ Ensure your repository has the following structure:
 ### 3. Automatic Deployment
 
 The deployment is triggered automatically when:
-- Code is pushed to the `main` or `master` branch
+- Code is pushed to the `release/prod` branch
 - Manual deployment is triggered via GitHub Actions tab
 
 ### 4. Deployment Workflow
 
-The GitHub Actions workflow (`.github/workflows/deploy.yml`) performs the following steps:
+The GitHub Actions workflow (`.github/workflows/deploy-to-github-pages.yml`) performs the following steps:
 
 1. **Checkout**: Downloads the repository code
 2. **Setup Pages**: Configures GitHub Pages environment

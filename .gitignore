@@ -1,0 +1,42 @@
+# Environment Configuration
+.env
+.env.*
+!.env.example
+
+# Dependency directory
+node_modules
+
+# Test coverage directory
+coverage
+
+# Ignore Apple macOS Desktop Services Store
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# ngrok tunnel file
+config/tunnel.pid
+
+# extensions build output
+extensions/*/build
+
+# Claude
+.claude/*
+!.claude/*.example*
+
+# Cursor
+.cursor/*
+.cursorignore
+!.cursor/*.example*
+
+# VS Code
+.vscode/*
+!.vscode/*.example.json
+
+
+# Ignore multi-commit automation files (.ft Copilot)
+auto_commit_changes.sh
+auto_commit_plan.json
+auto_commit_prompt.md
