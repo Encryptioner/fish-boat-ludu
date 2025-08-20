@@ -66,12 +66,17 @@ To manually trigger a deployment:
    - Ensure all files are properly committed
    - Verify the workflow file syntax
 
-2. **Site Not Loading**
+2. **Environment Protection Rules Error**
+   - If you get "Branch is not allowed to deploy to github-pages due to environment protection rules"
+   - This is fixed by removing the environment specification from the workflow
+   - The current workflow is configured to work with any branch that has deployment permissions
+
+3. **Site Not Loading**
    - Allow a few minutes for deployment to complete
    - Check if GitHub Pages is enabled in repository settings
    - Verify the correct branch is selected
 
-3. **JavaScript Not Working**
+4. **JavaScript Not Working**
    - Ensure all file paths are relative
    - Check browser console for errors
    - Verify no CORS issues with local file access
