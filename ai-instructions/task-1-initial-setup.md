@@ -239,10 +239,18 @@ $$ Rules
 ### Instructions
 1. Update the coding standards wherever possible
 2. Add a readme for easy understanding of the project
-3. Update `Claude.md` if necessary
 
 ### Comments
 1. Did some code improvement and added readme
 2. I removed the project structure from readme as it may changes often
 3. Also added `live server` option for development setup
-4. Ran the last instruction later
+
+## Instruction List 18
+
+### Instructions
+1. Update `Claude.md` if necessary
+2. Are there any other way to update the codebase? Make it modern and sleek in design
+
+### Comments
+1. Ran those instructions separately
+2. Seems it updated the code

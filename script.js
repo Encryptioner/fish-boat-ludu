@@ -56,6 +56,90 @@ class FishBoatLaddersGame {
         this.initialize();
     }
 
+    /**
+     * Get game configuration as a static getter
+     */
+    static get config() {
+        return {
+            BOARD_SIZE: this.BOARD_SIZE,
+            GRID_ROWS: this.GRID_ROWS,
+            GRID_COLS: this.GRID_COLS,
+            WINNING_SQUARE: this.WINNING_SQUARE,
+            STARTING_SQUARE: this.STARTING_SQUARE,
+            EXTRA_TURN_ROLL: this.EXTRA_TURN_ROLL,
+            ANIMATION_RANGE: this.ANIMATION_RANGE
+        };
+    }
+
+    /**
+     * Create a debounced version of a function
+     * @param {Function} func - Function to debounce
+     * @param {number} wait - Wait time in milliseconds
+     * @returns {Function} Debounced function
+     */
+    static debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    /**
+     * Set up Intersection Observer for performance optimization
+     */
+    setupIntersectionObserver() {
+        // Only observe animations when game board is visible
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Game board is visible, enable animations
+                        document.body.classList.add('game-visible');
+                    } else {
+                        // Game board is not visible, disable heavy animations for performance
+                        document.body.classList.remove('game-visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            const gameBoard = document.getElementById('game-board');
+            if (gameBoard) {
+                observer.observe(gameBoard);
+            }
+        }
+    }
+
+    /**
+     * Use requestAnimationFrame for smooth animations
+     * @param {Function} callback - Animation callback
+     */
+    scheduleAnimation(callback) {
+        if ('requestAnimationFrame' in window) {
+            return requestAnimationFrame(callback);
+        } else {
+            return setTimeout(callback, 16); // ~60fps fallback
+        }
+    }
+
+    /**
+     * Cancel scheduled animation
+     * @param {number} id - Animation frame ID
+     */
+    cancelAnimation(id) {
+        if ('cancelAnimationFrame' in window) {
+            cancelAnimationFrame(id);
+        } else {
+            clearTimeout(id);
+        }
+    }
+
     initialize() {
         this.createGameBoard();
         this.createPlayerPieces();
@@ -383,13 +467,21 @@ class FishBoatLaddersGame {
             }
         });
 
-        // Handle window resize to reposition pieces
-        window.addEventListener('resize', () => {
-            setTimeout(() => this.updatePlayerPositions(), 100);
-        });
+        // Handle window resize with throttled repositioning for performance
+        const throttledResize = FishBoatLaddersGame.throttle(() => {
+            this.updatePlayerPositions();
+        }, 100);
+        window.addEventListener('resize', throttledResize);
+
+        // Set up Intersection Observer for performance optimization
+        this.setupIntersectionObserver();
     }
 
-    rollDice() {
+    /**
+     * Roll dice with modern async patterns
+     * @returns {Promise<number>} The dice roll result
+     */
+    async rollDice() {
         if (this.isRolling || this.isGameOver) return;
 
         this.isRolling = true;
@@ -413,9 +505,9 @@ class FishBoatLaddersGame {
         diceValue.textContent = 'Rolling...';
         mobileDiceValue.textContent = 'Rolling...';
 
-        // Simulate dice roll with delay
-        setTimeout(() => {
-            const roll = Math.floor(Math.random() * 6) + 1;
+        // Simulate dice roll with modern Promise-based animation
+        try {
+            const roll = await this.animateDiceRoll();
             const diceEmoji = this.getDiceEmoji(roll);
             
             dice.classList.remove('rolling');
@@ -429,16 +521,31 @@ class FishBoatLaddersGame {
             this.canRollAgain = (roll === FishBoatLaddersGame.EXTRA_TURN_ROLL);
 
             // Move the player
-            this.movePlayer(roll);
+            await this.movePlayer(roll);
 
+            return roll;
+        } catch (error) {
+            console.error('Error during dice roll:', error);
+            this.updateGameStatus('❌ Error rolling dice. Please try again.');
+        } finally {
             // Re-enable controls
-            setTimeout(() => {
-                rollButton.disabled = false;
-                mobileRollButton.disabled = false;
-                this.isRolling = false;
-            }, 1000);
+            rollButton.disabled = false;
+            mobileRollButton.disabled = false;
+            this.isRolling = false;
+        }
+    }
 
-        }, 1000);
+    /**
+     * Animate dice roll with Promise-based timing
+     * @returns {Promise<number>} The rolled value
+     */
+    animateDiceRoll() {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const roll = Math.floor(Math.random() * 6) + 1;
+                resolve(roll);
+            }, 1000);
+        });
     }
 
     getDiceEmoji(value) {
@@ -446,7 +553,12 @@ class FishBoatLaddersGame {
         return diceEmojis[value - 1];
     }
 
-    movePlayer(steps) {
+    /**
+     * Move player with modern async/await pattern
+     * @param {number} steps - Number of steps to move
+     * @returns {Promise<void>}
+     */
+    async movePlayer(steps) {
         const player = this.players[this.currentPlayer];
         const oldPosition = player.position;
         const newPosition = player.position + steps;
@@ -464,32 +576,49 @@ class FishBoatLaddersGame {
             return;
         }
 
-        // Animate piece movement
-        player.piece.classList.add('moving');
+        // Animate piece movement with Promise
+        await this.animatePlayerMovement(player, newPosition);
 
-        // Update position after animation delay
-        setTimeout(() => {
-            player.position = newPosition;
-            this.updatePlayerPositions();
-            this.updateDisplay();
-            this.refreshFishBoatAnimations(); // Update animations based on new position
-            player.piece.classList.remove('moving');
+        // Check for win condition
+        if (newPosition === FishBoatLaddersGame.WINNING_SQUARE) {
+            this.handleGameWin();
+            return;
+        }
 
-            // Check for win condition
-            if (newPosition === FishBoatLaddersGame.WINNING_SQUARE) {
-                this.handleGameWin();
-                return;
-            }
-
-            // Check for fish or boat after short delay
-            setTimeout(() => {
-                this.checkSpecialSquares(newPosition);
-            }, 300);
-
-        }, 300);
+        // Check for fish or boat
+        await this.checkSpecialSquares(newPosition);
     }
 
-    checkSpecialSquares(position) {
+    /**
+     * Animate player movement with Promise-based timing
+     * @param {Object} player - Player object
+     * @param {number} newPosition - Target position
+     * @returns {Promise<void>}
+     */
+    animatePlayerMovement(player, newPosition) {
+        return new Promise((resolve) => {
+            player.piece.classList.add('moving');
+            
+            // Use requestAnimationFrame for smooth animation
+            this.scheduleAnimation(() => {
+                setTimeout(() => {
+                    player.position = newPosition;
+                    this.updatePlayerPositions();
+                    this.updateDisplay();
+                    this.refreshFishBoatAnimations();
+                    player.piece.classList.remove('moving');
+                    resolve();
+                }, 300);
+            });
+        });
+    }
+
+    /**
+     * Check and handle special squares (fish/boats) with modern async patterns
+     * @param {number} position - Current position to check
+     * @returns {Promise<void>}
+     */
+    async checkSpecialSquares(position) {
         const player = this.players[this.currentPlayer];
 
         // Check if landed on fish (like snake head)
@@ -776,15 +905,99 @@ class FishBoatLaddersGame {
     }
 
     /**
-     * Saves game statistics to localStorage
+     * Saves game statistics to localStorage with modern error handling
+     * @returns {Promise<boolean>} Success status
      */
-    saveGameStats() {
+    async saveGameStats() {
         try {
             const statsData = JSON.stringify(this.stats);
             localStorage.setItem('fishBoatGameStats', statsData);
+            return true;
         } catch (error) {
             console.error('Error saving game stats:', error);
-            // Could implement fallback storage or user notification here
+            this.handleStorageError('Failed to save game statistics');
+            return false;
+        }
+    }
+
+    /**
+     * Handle storage errors with user-friendly messages
+     * @param {string} message - Error message
+     */
+    handleStorageError(message) {
+        this.showNotification(`
+            ⚠️ <strong>Storage Error</strong><br/>
+            ${message}<br/>
+            Your progress may not be saved.
+        `, 4000);
+    }
+
+    /**
+     * Modern utility to safely access nested object properties
+     * @param {Object} obj - Object to access
+     * @param {string} path - Dot notation path
+     * @param {*} defaultValue - Default value if path not found
+     * @returns {*} Value at path or default
+     */
+    static safeGet(obj, path, defaultValue = null) {
+        return path.split('.').reduce((current, key) => current?.[key], obj) ?? defaultValue;
+    }
+
+    /**
+     * Modern throttle utility for performance optimization
+     * @param {Function} func - Function to throttle
+     * @param {number} limit - Time limit in milliseconds
+     * @returns {Function} Throttled function
+     */
+    static throttle(func, limit) {
+        let inThrottle;
+        return function(...args) {
+            if (!inThrottle) {
+                func.apply(this, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    }
+
+    /**
+     * Modern error boundary for handling unexpected errors
+     * @param {Error} error - The error that occurred
+     * @param {string} context - Context where error occurred
+     */
+    handleGameError(error, context = 'Unknown') {
+        console.error(`Game Error in ${context}:`, error);
+        
+        // Show user-friendly error message
+        this.showNotification(`
+            🔧 <strong>Oops! Something went wrong</strong><br/>
+            ${context}: ${error.message}<br/>
+            The game will continue to work normally.
+        `, 5000);
+
+        // Could send error to analytics service here
+        // this.sendErrorAnalytics(error, context);
+    }
+
+    /**
+     * Validate game state integrity
+     * @returns {boolean} True if game state is valid
+     */
+    validateGameState() {
+        try {
+            // Check player positions are valid
+            const validPositions = Object.values(this.players).every(player => 
+                player.position >= FishBoatLaddersGame.STARTING_SQUARE && 
+                player.position <= FishBoatLaddersGame.WINNING_SQUARE
+            );
+
+            // Check current player is valid
+            const validCurrentPlayer = [1, 2].includes(this.currentPlayer);
+
+            return validPositions && validCurrentPlayer;
+        } catch (error) {
+            this.handleGameError(error, 'Game State Validation');
+            return false;
         }
     }
 
