@@ -977,9 +977,13 @@ class FishBoatLaddersGame {
         // Simple audio context for sound effects using Web Audio API
         this.audioContext = null;
         try {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-            console.log('Web Audio API not supported');
+            // Use proper AudioContext with fallback for webkit browsers
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                this.audioContext = new AudioContextClass();
+            }
+        } catch (error) {
+            console.log('Web Audio API not supported:', error);
         }
     }
 
@@ -1024,10 +1028,10 @@ class FishBoatLaddersGame {
     playWinSound() {
         // Play a victory fanfare
         const notes = [523, 587, 659, 698, 784, 880]; // C, D, E, F, G, A
-        notes.forEach((note, index) => {
+        notes.forEach((note, noteIndex) => {
             setTimeout(() => {
                 this.playSound(note, 0.4, 'triangle');
-            }, index * 200);
+            }, noteIndex * 200);
         });
     }
 
