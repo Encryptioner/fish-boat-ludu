@@ -86,17 +86,29 @@ class FishBoatLaddersGame {
     createFishAndBoatVisuals() {
         const board = document.getElementById('game-board');
 
+        // Get current player positions to determine which fish/boats to animate
+        const currentPositions = [this.players[1].position, this.players[2].position];
+        const maxPosition = Math.max(...currentPositions);
+
         // Create fish visuals (like snakes)
         Object.keys(this.fishPositions).forEach(head => {
             const tail = this.fishPositions[head];
-            this.createFishPath(parseInt(head), parseInt(tail), board);
+            const shouldAnimate = this.shouldAnimateSpecialSquare(parseInt(head), maxPosition);
+            this.createFishPath(parseInt(head), parseInt(tail), board, shouldAnimate);
         });
 
         // Create boat visuals (like ladders)
         Object.keys(this.boatPositions).forEach(bottom => {
             const top = this.boatPositions[bottom];
-            this.createBoatPath(parseInt(bottom), parseInt(top), board);
+            const shouldAnimate = this.shouldAnimateSpecialSquare(parseInt(bottom), maxPosition);
+            this.createBoatPath(parseInt(bottom), parseInt(top), board, shouldAnimate);
         });
+    }
+
+    shouldAnimateSpecialSquare(squarePosition, maxPlayerPosition) {
+        // Only animate fish/boats that are within next 20 squares of the furthest player
+        // This keeps animation focused on relevant upcoming obstacles/helpers
+        return squarePosition >= maxPlayerPosition && squarePosition <= maxPlayerPosition + 20;
     }
 
     getSquarePosition(squareNumber) {
@@ -110,7 +122,7 @@ class FishBoatLaddersGame {
         return { row: actualRow, col: actualCol };
     }
 
-    createFishPath(head, tail, board) {
+    createFishPath(head, tail, board, shouldAnimate = true) {
         const headPos = this.getSquarePosition(head);
         const tailPos = this.getSquarePosition(tail);
         
@@ -145,14 +157,14 @@ class FishBoatLaddersGame {
         
         // Add fish head (bigger, more prominent)
         const fishHead = document.createElement('div');
-        fishHead.className = 'fish-head';
+        fishHead.className = shouldAnimate ? 'fish-head' : 'fish-head no-animation';
         fishHead.style.left = `${startX}%`;
         fishHead.style.top = `${startY}%`;
         fishHead.innerHTML = '🦈'; // Use shark for head to make it more menacing
         
         // Add fish tail (smaller)
         const fishTail = document.createElement('div');
-        fishTail.className = 'fish-tail';
+        fishTail.className = shouldAnimate ? 'fish-tail' : 'fish-tail no-animation';
         fishTail.style.left = `${endX}%`;
         fishTail.style.top = `${endY}%`;
         fishTail.innerHTML = '🌊'; // Wave for tail end
@@ -167,7 +179,7 @@ class FishBoatLaddersGame {
         board.appendChild(fishContainer);
     }
 
-    createBoatPath(bottom, top, board) {
+    createBoatPath(bottom, top, board, shouldAnimate = true) {
         const bottomPos = this.getSquarePosition(bottom);
         const topPos = this.getSquarePosition(top);
         
@@ -221,13 +233,13 @@ class FishBoatLaddersGame {
         
         // Add boat markers with better emojis
         const boatBottom = document.createElement('div');
-        boatBottom.className = 'boat-bottom';
+        boatBottom.className = shouldAnimate ? 'boat-bottom' : 'boat-bottom no-animation';
         boatBottom.style.left = `${startX}%`;
         boatBottom.style.top = `${startY}%`;
         boatBottom.innerHTML = '🚢'; // Ship at bottom
         
         const boatTop = document.createElement('div');
-        boatTop.className = 'boat-top';
+        boatTop.className = shouldAnimate ? 'boat-top' : 'boat-top no-animation';
         boatTop.style.left = `${endX}%`;
         boatTop.style.top = `${endY}%`;
         boatTop.innerHTML = '⛵'; // Sailboat at top
@@ -276,6 +288,19 @@ class FishBoatLaddersGame {
                 piece.style.top = `${top}px`;
             }
         });
+    }
+
+    refreshFishBoatAnimations() {
+        // Remove existing fish/boat visuals
+        const board = document.getElementById('game-board');
+        const fishContainers = board.querySelectorAll('.fish-container');
+        const boatContainers = board.querySelectorAll('.boat-container');
+        
+        fishContainers.forEach(container => container.remove());
+        boatContainers.forEach(container => container.remove());
+        
+        // Recreate with updated animations
+        this.createFishAndBoatVisuals();
     }
 
     setupEventListeners() {
@@ -412,6 +437,7 @@ class FishBoatLaddersGame {
             player.position = newPosition;
             this.updatePlayerPositions();
             this.updateDisplay();
+            this.refreshFishBoatAnimations(); // Update animations based on new position
             player.piece.classList.remove('moving');
 
             // Check for win condition
@@ -648,6 +674,7 @@ class FishBoatLaddersGame {
         // Update positions and display
         this.updatePlayerPositions();
         this.updateDisplay();
+        this.refreshFishBoatAnimations(); // Reset animations for new game
         this.updateGameStatus('🎮 New game started! Player 1, click "ROLL DICE" to begin!');
         
         // Show notification

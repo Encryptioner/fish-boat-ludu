@@ -194,3 +194,24 @@ $$ Rules
 ### Comments
 1. I faced usage limit. It says: Claude usage limit reached. Your limit will reset at 2am (Asia/Dhaka)
 2. Will try updating design tomorrow
+
+
+## Instruction List 14
+
+### Instructions
+1. The boat, fish icon has animation. Those are going out of the boards
+2. Instead of being large and small animation for animation for all icons, the animation could only show for the next two/three fish and boat position. Then, visually it will be less distracting
+3. The dice position of of players in board, is hard to find among the fish and boat. It should be visually good for better UX
+
+### Comments
+1. It did some work. Need to verify.
+2. The bouncing effect still goes out of squeare
+
+
+## Instruction List 15
+
+### Instructions
+1. Update the design to make of fish and boat icons and corresponding circle little bit smaller
+2. On tap of role dice, play rolling sound
+3. In mobile view, the rolling dice could be little smaller
+4. Use space wisely in mobile view to show the key information easily so that, player do not need scrolling.
