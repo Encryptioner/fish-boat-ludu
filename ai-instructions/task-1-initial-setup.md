@@ -215,3 +215,14 @@ $$ Rules
 2. On tap of role dice, play rolling sound
 3. In mobile view, the rolling dice could be little smaller
 4. Use space wisely in mobile view to show the key information easily so that, player do not need scrolling.
+5. Not only space, the positioning should be better
+
+### Comments
+1. Better, but the mobile view as unusual space
+
+## Instruction List 16
+
+### Instructions
+1. The mobile view needs to be better. For all screen sizes, the player's point, board, roll dice and instructions for each turn should be visible in one view
+2. The hamburger menu overlaps wth title of game and not easily visible
+3. Read `../screenshots/after-instruction-list-15.png` to understand what to update
