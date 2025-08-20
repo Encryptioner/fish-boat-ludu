@@ -250,7 +250,10 @@ $$ Rules
 ### Instructions
 1. Update `Claude.md` if necessary
 2. Are there any other way to update the codebase? Make it modern and sleek in design
+3. Add a developed by section at bottom of website s footer. Developed by Ankur Mursalin. It should point to the https://encryptioner.github.io/
+4. Make the designe more slick Also, ensure the favicon shows in browser tab
+5. I am talking about footer
 
 ### Comments
 1. Ran those instructions separately
-2. Seems it updated the code
+2. Seems it updated the code ok
