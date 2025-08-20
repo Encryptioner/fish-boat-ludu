@@ -226,3 +226,8 @@ $$ Rules
 1. The mobile view needs to be better. For all screen sizes, the player's point, board, roll dice and instructions for each turn should be visible in one view
 2. The hamburger menu overlaps wth title of game and not easily visible
 3. Read `../screenshots/after-instruction-list-15.png` to understand what to update
+
+### Comments
+1. It made the design better. However, still there was empty space
+2. Inspecting design and checking the code, it shows it is using unnecessary `min-height: 100vh` at a place, which isn't necessary
+3. After updating that, the design looked better
