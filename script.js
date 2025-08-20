@@ -1,10 +1,28 @@
+/**
+ * Fish & Boat Ladders Game - A browser-based variant of Snakes and Ladders
+ * Features fish (snakes) that drag players down and boats (ladders) that lift players up
+ * Supports two players with persistent game state and statistics
+ */
 class FishBoatLaddersGame {
+    // Game constants
+    static BOARD_SIZE = 100;
+    static GRID_ROWS = 10;
+    static GRID_COLS = 10;
+    static WINNING_SQUARE = 100;
+    static STARTING_SQUARE = 1;
+    static EXTRA_TURN_ROLL = 1; // Rolling 1 gives extra turn
+    static ANIMATION_RANGE = 20; // Only animate fish/boats within this range
+
+    /**
+     * Initialize the Fish & Boat Ladders game
+     * Sets up game state, positions, and loads saved data
+     */
     constructor() {
         // Game state
         this.currentPlayer = 1;
         this.players = {
-            1: { position: 1, piece: null, name: 'Player 1' },
-            2: { position: 1, piece: null, name: 'Player 2' }
+            1: { position: FishBoatLaddersGame.STARTING_SQUARE, piece: null, name: 'Player 1' },
+            2: { position: FishBoatLaddersGame.STARTING_SQUARE, piece: null, name: 'Player 2' }
         };
         this.isGameOver = false;
         this.isRolling = false;
@@ -105,19 +123,32 @@ class FishBoatLaddersGame {
         });
     }
 
+    /**
+     * Determines if a special square (fish/boat) should be animated
+     * @param {number} squarePosition - The position of the special square
+     * @param {number} maxPlayerPosition - The furthest player position
+     * @returns {boolean} True if the square should be animated
+     */
     shouldAnimateSpecialSquare(squarePosition, maxPlayerPosition) {
-        // Only animate fish/boats that are within next 20 squares of the furthest player
+        // Only animate fish/boats that are within animation range of the furthest player
         // This keeps animation focused on relevant upcoming obstacles/helpers
-        return squarePosition >= maxPlayerPosition && squarePosition <= maxPlayerPosition + 20;
+        return squarePosition >= maxPlayerPosition && 
+               squarePosition <= maxPlayerPosition + FishBoatLaddersGame.ANIMATION_RANGE;
     }
 
+    /**
+     * Calculates the grid position for a given square number
+     * Accounts for the zigzag pattern of a traditional Snakes & Ladders board
+     * @param {number} squareNumber - Square number (1-100)
+     * @returns {Object} Object with row and col properties
+     */
     getSquarePosition(squareNumber) {
-        const row = Math.floor((squareNumber - 1) / 10);
-        const col = (squareNumber - 1) % 10;
+        const row = Math.floor((squareNumber - 1) / FishBoatLaddersGame.GRID_COLS);
+        const col = (squareNumber - 1) % FishBoatLaddersGame.GRID_COLS;
         
-        // Adjust for zigzag pattern
-        const actualCol = row % 2 === 0 ? col : 9 - col;
-        const actualRow = 9 - row;
+        // Adjust for zigzag pattern (even rows go left-to-right, odd rows go right-to-left)
+        const actualCol = row % 2 === 0 ? col : (FishBoatLaddersGame.GRID_COLS - 1) - col;
+        const actualRow = (FishBoatLaddersGame.GRID_ROWS - 1) - row;
         
         return { row: actualRow, col: actualCol };
     }
@@ -394,8 +425,8 @@ class FishBoatLaddersGame {
             diceValue.textContent = `Rolled: ${roll}`;
             mobileDiceValue.textContent = `Rolled: ${roll}`;
 
-            // Check if player gets another turn (rolled 1)
-            this.canRollAgain = (roll === 1);
+            // Check if player gets another turn (rolled the extra turn number)
+            this.canRollAgain = (roll === FishBoatLaddersGame.EXTRA_TURN_ROLL);
 
             // Move the player
             this.movePlayer(roll);
@@ -423,9 +454,10 @@ class FishBoatLaddersGame {
         // Record the move
         this.recordMove(this.currentPlayer, steps, oldPosition, newPosition);
 
-        // Check if player would exceed 100
-        if (newPosition > 100) {
-            this.updateGameStatus(`🎯 Player ${this.currentPlayer} needs exactly ${100 - player.position} to win!`);
+        // Check if player would exceed winning square
+        if (newPosition > FishBoatLaddersGame.WINNING_SQUARE) {
+            const needed = FishBoatLaddersGame.WINNING_SQUARE - player.position;
+            this.updateGameStatus(`🎯 Player ${this.currentPlayer} needs exactly ${needed} to win!`);
             if (!this.canRollAgain) {
                 this.switchPlayer();
             }
@@ -444,7 +476,7 @@ class FishBoatLaddersGame {
             player.piece.classList.remove('moving');
 
             // Check for win condition
-            if (newPosition === 100) {
+            if (newPosition === FishBoatLaddersGame.WINNING_SQUARE) {
                 this.handleGameWin();
                 return;
             }
@@ -528,8 +560,8 @@ class FishBoatLaddersGame {
                     this.updateDisplay();
                     player.piece.classList.remove('moving');
 
-                    // Check if boat took player to 100
-                    if (boatTop === 100) {
+                    // Check if boat took player to winning square
+                    if (boatTop === FishBoatLaddersGame.WINNING_SQUARE) {
                         this.handleGameWin();
                         return;
                     }
@@ -551,7 +583,7 @@ class FishBoatLaddersGame {
         if (!this.canRollAgain) {
             this.switchPlayer();
         } else {
-            this.updateGameStatus(`🎲 Player ${this.currentPlayer} rolled a 1! Roll again!`);
+            this.updateGameStatus(`🎲 Player ${this.currentPlayer} rolled a ${FishBoatLaddersGame.EXTRA_TURN_ROLL}! Roll again!`);
             this.canRollAgain = false;
         }
     }
@@ -653,8 +685,8 @@ class FishBoatLaddersGame {
     resetGame() {
         // Reset game state
         this.currentPlayer = 1;
-        this.players[1].position = 1;
-        this.players[2].position = 1;
+        this.players[1].position = FishBoatLaddersGame.STARTING_SQUARE;
+        this.players[2].position = FishBoatLaddersGame.STARTING_SQUARE;
         this.isGameOver = false;
         this.isRolling = false;
         this.canRollAgain = false;
@@ -714,15 +746,28 @@ class FishBoatLaddersGame {
         );
     }
 
+    /**
+     * Loads game statistics from localStorage
+     * @returns {Object} Statistics object with player wins and total games
+     */
     loadGameStats() {
-        const saved = localStorage.getItem('fishBoatGameStats');
-        if (saved) {
-            try {
-                return JSON.parse(saved);
-            } catch (e) {
-                console.error('Error loading game stats:', e);
+        try {
+            const saved = localStorage.getItem('fishBoatGameStats');
+            if (saved) {
+                const stats = JSON.parse(saved);
+                // Validate loaded data structure
+                if (typeof stats === 'object' && 
+                    typeof stats.player1Wins === 'number' &&
+                    typeof stats.player2Wins === 'number' &&
+                    typeof stats.totalGames === 'number') {
+                    return stats;
+                }
             }
+        } catch (error) {
+            console.error('Error loading game stats:', error);
         }
+        
+        // Return default stats if loading fails or data is invalid
         return {
             player1Wins: 0,
             player2Wins: 0,
@@ -730,19 +775,32 @@ class FishBoatLaddersGame {
         };
     }
 
+    /**
+     * Saves game statistics to localStorage
+     */
     saveGameStats() {
         try {
-            localStorage.setItem('fishBoatGameStats', JSON.stringify(this.stats));
-        } catch (e) {
-            console.error('Error saving game stats:', e);
+            const statsData = JSON.stringify(this.stats);
+            localStorage.setItem('fishBoatGameStats', statsData);
+        } catch (error) {
+            console.error('Error saving game stats:', error);
+            // Could implement fallback storage or user notification here
         }
     }
 
+    /**
+     * Records a player move in the game history
+     * @param {number} player - Player number (1 or 2)
+     * @param {number} diceRoll - The dice roll value
+     * @param {number} fromSquare - Starting square
+     * @param {number} toSquare - Ending square
+     * @param {Object|null} specialAction - Special action details (fish/boat)
+     */
     recordMove(player, diceRoll, fromSquare, toSquare, specialAction = null) {
         const now = new Date();
         const move = {
             player: player,
-            playerName: this.players[player].name, // Store current player name
+            playerName: this.players[player]?.name || `Player ${player}`, // Store current player name with fallback
             roll: diceRoll,
             from: fromSquare,
             to: toSquare,

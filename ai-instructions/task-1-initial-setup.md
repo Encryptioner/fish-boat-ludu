@@ -220,6 +220,7 @@ $$ Rules
 ### Comments
 1. Better, but the mobile view as unusual space
 
+
 ## Instruction List 16
 
 ### Instructions
@@ -231,3 +232,15 @@ $$ Rules
 1. It made the design better. However, still there was empty space
 2. Inspecting design and checking the code, it shows it is using unnecessary `min-height: 100vh` at a place, which isn't necessary
 3. After updating that, the design looked better
+
+
+## Instruction List 17
+
+### Instructions
+1. Update the coding standards wherever possible
+2. Add a readme for easy understanding of the project
+
+### Comments
+1. Did some code improvement and added readme
+2. I removed the project structure from readme as it may changes often
+3. Also added `live server` option for development setup
