@@ -1,6 +1,6 @@
 # Guidelines
 
-$$ Rules
+## Rules
 1. Design like a professional lead software engineer
 2. Ensure the code follows latest standard and maintainable
 
