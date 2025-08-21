@@ -117,7 +117,7 @@ class FishBoatLaddersGame {
     }
 
     /**
-     * Use requestAnimationFrame for smooth animations
+     * Use requestAnimationFrame for smooth animations with mobile optimization
      * @param {Function} callback - Animation callback
      */
     scheduleAnimation(callback) {
@@ -126,6 +126,17 @@ class FishBoatLaddersGame {
         } else {
             return setTimeout(callback, 16); // ~60fps fallback
         }
+    }
+
+    /**
+     * Optimized batch DOM updates for mobile performance
+     * @param {Function} updateFunction - Function containing DOM updates
+     */
+    batchDOMUpdates(updateFunction) {
+        // Use requestAnimationFrame to batch DOM updates
+        this.scheduleAnimation(() => {
+            updateFunction();
+        });
     }
 
     /**
@@ -383,25 +394,30 @@ class FishBoatLaddersGame {
     }
 
     updatePlayerPositions() {
-        Object.keys(this.players).forEach(playerId => {
-            const player = this.players[playerId];
-            const targetSquare = document.getElementById(`square-${player.position}`);
-            const piece = player.piece;
+        // Batch DOM updates for better mobile performance
+        this.batchDOMUpdates(() => {
+            const board = document.getElementById('game-board');
+            const boardRect = board.getBoundingClientRect();
 
-            if (targetSquare && piece) {
-                const squareRect = targetSquare.getBoundingClientRect();
-                const boardRect = document.getElementById('game-board').getBoundingClientRect();
+            Object.keys(this.players).forEach(playerId => {
+                const player = this.players[playerId];
+                const targetSquare = document.getElementById(`square-${player.position}`);
+                const piece = player.piece;
 
-                // Calculate piece position with slight offset for each player
-                const offsetX = playerId === '1' ? -5 : 5;
-                const offsetY = playerId === '1' ? -5 : 5;
+                if (targetSquare && piece) {
+                    const squareRect = targetSquare.getBoundingClientRect();
 
-                const left = squareRect.left - boardRect.left + squareRect.width / 2 - 10 + offsetX;
-                const top = squareRect.top - boardRect.top + squareRect.height / 2 - 10 + offsetY;
+                    // Calculate piece position with slight offset for each player
+                    const offsetX = playerId === '1' ? -5 : 5;
+                    const offsetY = playerId === '1' ? -5 : 5;
 
-                piece.style.left = `${left}px`;
-                piece.style.top = `${top}px`;
-            }
+                    const left = squareRect.left - boardRect.left + squareRect.width / 2 - 10 + offsetX;
+                    const top = squareRect.top - boardRect.top + squareRect.height / 2 - 10 + offsetY;
+
+                    // Use transform instead of left/top for better performance
+                    piece.style.transform = `translate(${left}px, ${top}px)`;
+                }
+            });
         });
     }
 
@@ -471,7 +487,7 @@ class FishBoatLaddersGame {
         const throttledResize = FishBoatLaddersGame.throttle(() => {
             this.updatePlayerPositions();
         }, 100);
-        window.addEventListener('resize', throttledResize);
+        window.addEventListener('resize', throttledResize, { passive: true });
 
         // Set up Intersection Observer for performance optimization
         this.setupIntersectionObserver();
@@ -590,7 +606,7 @@ class FishBoatLaddersGame {
     }
 
     /**
-     * Animate player movement with Promise-based timing
+     * Animate player movement with Promise-based timing - optimized for mobile
      * @param {Object} player - Player object
      * @param {number} newPosition - Target position
      * @returns {Promise<void>}
@@ -601,14 +617,20 @@ class FishBoatLaddersGame {
             
             // Use requestAnimationFrame for smooth animation
             this.scheduleAnimation(() => {
+                // Reduced animation time for mobile
+                const animationTime = window.innerWidth <= 768 ? 200 : 300;
+                
                 setTimeout(() => {
                     player.position = newPosition;
-                    this.updatePlayerPositions();
-                    this.updateDisplay();
-                    this.refreshFishBoatAnimations();
-                    player.piece.classList.remove('moving');
+                    // Batch all updates together
+                    this.batchDOMUpdates(() => {
+                        this.updatePlayerPositions();
+                        this.updateDisplay();
+                        this.refreshFishBoatAnimations();
+                        player.piece.classList.remove('moving');
+                    });
                     resolve();
-                }, 300);
+                }, animationTime);
             });
         });
     }
@@ -1056,7 +1078,7 @@ class FishBoatLaddersGame {
         // Show latest moves first by reversing the array
         const reversedHistory = [...this.gameHistory].reverse();
         
-        reversedHistory.forEach((move, index) => {
+        reversedHistory.forEach((move) => {
             const isSpecial = move.special !== null;
             const specialClass = isSpecial ? ' special' : '';
             
@@ -1191,7 +1213,7 @@ class FishBoatLaddersGame {
         this.audioContext = null;
         try {
             // Use proper AudioContext with fallback for webkit browsers
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            const AudioContextClass = window.AudioContext || window['webkitAudioContext'];
             if (AudioContextClass) {
                 this.audioContext = new AudioContextClass();
             }
