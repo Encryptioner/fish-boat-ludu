@@ -1,14 +1,14 @@
 /* Modern CSS Custom Properties */
 :root {
-    /* Color System */
-    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
-    --modern-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-    --glass-gradient: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    --card-gradient: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
-    --glass-effect: rgba(255, 255, 255, 0.15);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    --backdrop-blur: blur(8px);
+    /* Color System - Simplified for better mobile performance */
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --modern-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --glass-gradient: rgba(255,255,255,0.08);
+    --card-gradient: rgba(255,255,255,0.9);
+    --glass-effect: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --shadow-glass: 0 4px 16px 0 rgba(31, 38, 135, 0.25);
+    --backdrop-blur: blur(4px);
     
     /* Neutral Colors */
     --white: #ffffff;
@@ -77,20 +77,95 @@
     box-sizing: border-box;
 }
 
-/* Performance optimizations */
+/* Enhanced performance optimizations for mobile devices */
 body:not(.game-visible) .fish-line,
 body:not(.game-visible) .boat-line,
 body:not(.game-visible) .containerGlow {
     animation-play-state: paused;
 }
 
-/* GPU acceleration for smooth animations */
+/* Comprehensive GPU acceleration and containment for mobile performance */
 .game-piece,
 .dice,
 .roll-button,
-.player-card {
+.player-card,
+.mobile-dice,
+.mobile-roll-button,
+.game-board,
+.modal-content,
+.notification-area,
+.mobile-menu-content {
     will-change: transform;
     transform: translateZ(0);
+    contain: layout style paint;
+}
+
+/* Reduce animations on low-end devices */
+@media (max-width: 480px) {
+    * {
+        animation-duration: 0.2s !important;
+        transition-duration: 0.15s !important;
+    }
+}
+
+/* Webview optimizations for mobile app deployment */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Webview optimizations */
+    body {
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-touch-callout: none;
+        -webkit-text-size-adjust: none;
+    }
+}
+
+/* Android Webview optimizations */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .game-board,
+    .square,
+    .game-piece {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+    }
+}
+
+/* Prevent visual instability and ensure consistent rendering */
+.game-header,
+.game-container,
+.game-board {
+    isolation: isolate;
+    contain: layout style paint;
+}
+
+/* Fix potential z-index stacking issues in webviews */
+.game-header {
+    position: relative;
+    z-index: 1;
+}
+
+.game-board {
+    position: relative;
+    z-index: 2;
+}
+
+.game-piece {
+    position: absolute;
+    z-index: 150;
+}
+
+/* Optimize for reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .game-container,
+    .containerGlow,
+    .activePlayerPulse,
+    .finishGlow,
+    .shine,
+    .bounce,
+    .gradientShift {
+        animation: none !important;
+    }
 }
 
 /* Smooth scrolling for modern browsers */
@@ -113,8 +188,7 @@ html {
 body {
     font-family: var(--font-sans);
     background: var(--modern-gradient);
-    background-size: 400% 400%;
-    animation: gradientShift 25s ease infinite;
+    background-attachment: fixed;
     min-height: 100vh;
     padding: var(--space-6);
     color: var(--gray-800);
@@ -126,6 +200,18 @@ body {
     overscroll-behavior: none;
     position: relative;
     overflow-x: hidden;
+    scroll-behavior: smooth;
+    /* Improved mobile scrolling */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+/* Simplified gradient animation for mobile performance */
+@media (min-width: 769px) {
+    body {
+        background-size: 400% 400%;
+        animation: gradientShift 30s ease infinite;
+    }
 }
 
 @keyframes gradientShift {
@@ -141,10 +227,17 @@ body {
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-glass);
     overflow: hidden;
-    backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     position: relative;
-    animation: containerGlow 6s ease-in-out infinite alternate;
+    /* Reduce backdrop-filter for mobile performance */
+    backdrop-filter: var(--backdrop-blur);
+}
+
+/* Container glow only on desktop for better mobile performance */
+@media (min-width: 769px) {
+    .game-container {
+        animation: containerGlow 8s ease-in-out infinite alternate;
+    }
 }
 
 @keyframes containerGlow {
@@ -171,6 +264,7 @@ body {
     backdrop-filter: var(--backdrop-blur);
 }
 
+/* Header shine effect disabled to prevent visual blipping */
 .game-header::before {
     content: '';
     position: absolute;
@@ -180,7 +274,15 @@ body {
     height: 200%;
     background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
     transform: rotate(45deg);
-    animation: shine 4s infinite ease-in-out;
+    /* Animation removed to prevent header blipping/shaking */
+    /* animation: shine 4s infinite ease-in-out; */
+}
+
+/* Header shine animation only on desktop and only on hover for better UX */
+@media (min-width: 769px) {
+    .game-header:hover::before {
+        animation: shine 2s ease-in-out;
+    }
 }
 
 .game-header h1 {
@@ -246,7 +348,7 @@ body {
     transform: rotate(-45deg) translate(6px, -6px);
 }
 
-/* Mobile menu overlay */
+/* Mobile menu overlay - optimized for performance */
 .mobile-menu-overlay {
     display: none;
     position: fixed;
@@ -256,7 +358,10 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
     z-index: 1000;
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeIn 0.2s ease-out;
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    will-change: opacity;
 }
 
 .mobile-menu-content {
@@ -266,8 +371,10 @@ body {
     background: white;
     border-radius: 15px;
     min-width: 200px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    animation: slideInRight 0.3s ease-out;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    animation: slideInRight 0.25s ease-out;
+    transform: translateZ(0);
+    will-change: transform, opacity;
 }
 
 .mobile-menu-header {
@@ -382,8 +489,14 @@ body {
     background: linear-gradient(135deg, rgba(255,247,237,0.9), rgba(254,215,170,0.8));
     border: 1px solid rgba(251, 146, 60, 0.5);
     transform: scale(1.02);
-    box-shadow: var(--shadow-glass), 0 0 25px rgba(251, 146, 60, 0.3);
-    animation: activePlayerPulse 3s ease-in-out infinite alternate;
+    box-shadow: var(--shadow-glass), 0 0 15px rgba(251, 146, 60, 0.2);
+}
+
+/* Active player pulse only on desktop */
+@media (min-width: 769px) {
+    .player-card.active {
+        animation: activePlayerPulse 4s ease-in-out infinite alternate;
+    }
 }
 
 @keyframes activePlayerPulse {
@@ -461,11 +574,17 @@ body {
     align-items: center;
     gap: var(--space-4);
     background: var(--glass-gradient);
-    backdrop-filter: var(--backdrop-blur);
     padding: var(--space-8);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-glass);
     border: 1px solid var(--glass-border);
+}
+
+/* Backdrop-filter only on desktop for performance */
+@media (min-width: 769px) {
+    .dice-area {
+        backdrop-filter: var(--backdrop-blur);
+    }
 }
 
 .dice-container {
@@ -480,13 +599,20 @@ body {
     cursor: pointer;
     padding: var(--space-6);
     background: var(--glass-gradient);
-    backdrop-filter: var(--backdrop-blur);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-glass);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     border: 1px solid var(--glass-border);
     position: relative;
     overflow: hidden;
+}
+
+/* Enhanced dice effects only on desktop */
+@media (min-width: 769px) {
+    .dice {
+        backdrop-filter: var(--backdrop-blur);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 }
 
 .dice::before {
@@ -721,19 +847,27 @@ body {
     grid-template-columns: repeat(10, 1fr);
     gap: 3px;
     background: var(--glass-gradient);
-    backdrop-filter: var(--backdrop-blur);
     border: 1px solid var(--glass-border);
     padding: var(--space-6);
     border-radius: var(--radius-2xl);
     width: 600px;
     height: 600px;
     position: relative;
-    box-shadow: var(--shadow-glass), 0 0 0 1px rgba(255,255,255,0.1);
+    box-shadow: var(--shadow-glass);
+    /* Optimize grid for mobile performance */
+    contain: layout style paint;
+}
+
+/* Enhanced board effects only on desktop */
+@media (min-width: 769px) {
+    .game-board {
+        backdrop-filter: var(--backdrop-blur);
+        box-shadow: var(--shadow-glass), 0 0 0 1px rgba(255,255,255,0.1);
+    }
 }
 
 .square {
-    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.8));
-    backdrop-filter: blur(4px);
+    background: rgba(255,255,255,0.85);
     border: 1px solid rgba(255,255,255,0.3);
     border-radius: var(--radius-lg);
     display: flex;
@@ -743,10 +877,21 @@ body {
     font-size: 18px;
     color: #1a202c;
     position: relative;
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease;
     text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     font-family: 'Arial Black', 'Helvetica', sans-serif;
+    contain: layout style paint;
+}
+
+/* Enhanced square effects only on desktop */
+@media (min-width: 769px) {
+    .square {
+        background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,252,0.8));
+        backdrop-filter: blur(4px);
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
 }
 
 .square:hover {
@@ -764,9 +909,40 @@ body {
     background: linear-gradient(135deg, #ed8936, #dd6b20);
     color: white;
     font-weight: bold;
-    animation: finishGlow 2s ease-in-out infinite;
     position: relative;
     overflow: hidden;
+    /* Mobile-friendly subtle glow effect */
+    box-shadow: 0 0 4px rgba(237, 137, 54, 0.4);
+    border: 2px solid rgba(255, 193, 7, 0.6);
+}
+
+/* Enhanced finish square effects on desktop */
+@media (min-width: 769px) {
+    .square.finish {
+        animation: finishGlow 3s ease-in-out infinite;
+        box-shadow: 0 0 8px rgba(237, 137, 54, 0.6);
+    }
+}
+
+/* Mobile-optimized finish square animation */
+@media (max-width: 768px) {
+    .square.finish {
+        animation: mobileFinishPulse 2s ease-in-out infinite alternate;
+    }
+}
+
+/* Mobile finish animation - subtle pulse effect */
+@keyframes mobileFinishPulse {
+    0% { 
+        box-shadow: 0 0 4px rgba(237, 137, 54, 0.4);
+        border-color: rgba(255, 193, 7, 0.6);
+        transform: scale(1);
+    }
+    100% { 
+        box-shadow: 0 0 8px rgba(237, 137, 54, 0.7);
+        border-color: rgba(255, 193, 7, 0.9);
+        transform: scale(1.02);
+    }
 }
 
 .square.finish::before {
@@ -777,7 +953,14 @@ body {
     width: 200%;
     height: 200%;
     background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: shine 3s infinite;
+    /* Shine animation only on desktop to prevent mobile blipping */
+}
+
+/* Desktop shine effect for finish square */
+@media (min-width: 769px) {
+    .square.finish::before {
+        animation: shine 3s infinite;
+    }
 }
 
 @keyframes finishGlow {
@@ -814,12 +997,19 @@ body {
 .fish-line {
     fill: none;
     stroke: #dc2626;
-    stroke-width: 4;
+    stroke-width: 3;
     stroke-linecap: round;
     opacity: 0.8;
-    filter: drop-shadow(1px 1px 3px rgba(220,38,38,0.4));
     stroke-dasharray: 6, 3;
-    animation: fishSwim 3s ease-in-out infinite;
+}
+
+/* Fish swim animation only on desktop */
+@media (min-width: 769px) {
+    .fish-line {
+        stroke-width: 4;
+        filter: drop-shadow(1px 1px 3px rgba(220,38,38,0.4));
+        animation: fishSwim 3s ease-in-out infinite;
+    }
 }
 
 @keyframes fishSwim {
@@ -830,10 +1020,17 @@ body {
 .boat-line {
     fill: none;
     stroke: #92400e;
-    stroke-width: 4;
+    stroke-width: 3;
     stroke-linecap: round;
     opacity: 0.85;
-    filter: drop-shadow(1px 1px 3px rgba(146,64,14,0.4));
+}
+
+/* Enhanced boat line effects only on desktop */
+@media (min-width: 769px) {
+    .boat-line {
+        stroke-width: 4;
+        filter: drop-shadow(1px 1px 3px rgba(146,64,14,0.4));
+    }
 }
 
 .boat-rung {
@@ -850,12 +1047,20 @@ body {
     font-size: 24px;
     transform: translate(-50%, -50%);
     z-index: 60;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-    animation: bounce 3s ease-in-out infinite;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
     padding: 6px;
     border: 2px solid transparent;
+    contain: layout style paint;
+}
+
+/* Bounce animation and enhanced effects only on desktop */
+@media (min-width: 769px) {
+    .fish-head, .fish-tail, .boat-bottom, .boat-top {
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        animation: bounce 3s ease-in-out infinite;
+    }
 }
 
 .fish-head {
@@ -901,7 +1106,7 @@ body {
     animation: none !important;
 }
 
-/* Player pieces */
+/* Player pieces - optimized for accurate positioning */
 .game-piece {
     position: absolute;
     width: 24px;
@@ -912,6 +1117,32 @@ body {
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.9);
     animation: playerGlow 3s ease-in-out infinite alternate;
+    /* Ensure consistent positioning across devices */
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    /* Better mobile rendering */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Mobile-specific optimizations for player pieces */
+@media (max-width: 768px) {
+    .game-piece {
+        /* Slightly smaller on mobile for better fit */
+        width: 22px;
+        height: 22px;
+        border-width: 2px;
+        /* Faster animation on mobile */
+        transition: all 0.3s ease;
+        /* Reduced glow effect on mobile */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.8);
+    }
+    
+    /* Disable player glow animation on mobile for better performance */
+    .game-piece {
+        animation: none;
+    }
 }
 
 .game-piece.player1 {
@@ -963,15 +1194,24 @@ body {
     box-shadow: var(--shadow-glass), 0 0 30px rgba(239, 68, 68, 0.3);
 }
 
-/* Notification area */
+/* Notification area - optimized for mobile performance */
 .notification-area {
-    background: linear-gradient(135deg, rgba(254,243,199,0.9), rgba(252,211,77,0.8));
-    backdrop-filter: var(--backdrop-blur);
+    background: rgba(254,243,199,0.95);
     border: 1px solid rgba(245, 158, 11, 0.3);
     border-radius: var(--radius-lg);
     padding: 15px;
     text-align: center;
-    animation: slideDown 0.5s ease-out;
+    animation: slideDown 0.3s ease-out;
+    transform: translateZ(0);
+}
+
+/* Enhanced notification effects only on desktop */
+@media (min-width: 769px) {
+    .notification-area {
+        background: linear-gradient(135deg, rgba(254,243,199,0.9), rgba(252,211,77,0.8));
+        backdrop-filter: var(--backdrop-blur);
+        animation: slideDown 0.5s ease-out;
+    }
 }
 
 .notification-content {
@@ -1018,8 +1258,10 @@ body {
     max-width: 600px;
     max-height: 80vh;
     overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    animation: slideUp 0.3s ease-out;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.25);
+    animation: slideUp 0.25s ease-out;
+    transform: translateZ(0);
+    will-change: transform, opacity;
 }
 
 .modal-header {
@@ -1304,14 +1546,38 @@ body {
     color: #4a5568;
 }
 
-/* Enhanced responsive design */
+/* Enhanced responsive design with mobile performance optimizations */
 @media (max-width: 768px) {
+    body {
+        /* Disable background animation on mobile */
+        animation: none;
+        background: var(--primary-gradient);
+        /* Webview performance optimizations */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeSpeed;
+    }
+    
     .game-content {
         grid-template-columns: 1fr;
         gap: 12px;
         padding: 12px;
         display: flex;
         flex-direction: column;
+        /* Optimize rendering */
+        contain: layout style paint;
+    }
+    
+    /* Reduce backdrop-filter usage on mobile */
+    .game-container {
+        backdrop-filter: none;
+    }
+    
+    /* Simplify glass effects */
+    .game-info,
+    .mobile-dice-area {
+        backdrop-filter: none;
+        background: rgba(255, 255, 255, 0.9);
     }
     
     .game-board {
@@ -1404,6 +1670,15 @@ body {
         display: flex;
         flex-direction: column;
         overflow-x: hidden;
+        /* Aggressive optimization for low-end devices */
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    
+    /* Disable all non-essential animations on small screens */
+    *, *::before, *::after {
+        animation-duration: 0.1s !important;
+        transition-duration: 0.1s !important;
     }
     
     .game-content {

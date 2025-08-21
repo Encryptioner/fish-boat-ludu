@@ -50,3 +50,4 @@ The deployment was rejected or didn't satisfy other protection rules.
 
 ### Comments
 1. It did some change in deployment script. Let's try it
+2. The changes seems working
