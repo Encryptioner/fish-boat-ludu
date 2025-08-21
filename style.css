@@ -108,6 +108,53 @@ body:not(.game-visible) .containerGlow {
     }
 }
 
+/* Webview optimizations for mobile app deployment */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Webview optimizations */
+    body {
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: rgba(0,0,0,0);
+        -webkit-touch-callout: none;
+        -webkit-text-size-adjust: none;
+    }
+}
+
+/* Android Webview optimizations */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .game-board,
+    .square,
+    .game-piece {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+    }
+}
+
+/* Prevent visual instability and ensure consistent rendering */
+.game-header,
+.game-container,
+.game-board {
+    isolation: isolate;
+    contain: layout style paint;
+}
+
+/* Fix potential z-index stacking issues in webviews */
+.game-header {
+    position: relative;
+    z-index: 1;
+}
+
+.game-board {
+    position: relative;
+    z-index: 2;
+}
+
+.game-piece {
+    position: absolute;
+    z-index: 150;
+}
+
 /* Optimize for reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
     .game-container,
@@ -217,6 +264,7 @@ body {
     backdrop-filter: var(--backdrop-blur);
 }
 
+/* Header shine effect disabled to prevent visual blipping */
 .game-header::before {
     content: '';
     position: absolute;
@@ -226,7 +274,15 @@ body {
     height: 200%;
     background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
     transform: rotate(45deg);
-    animation: shine 4s infinite ease-in-out;
+    /* Animation removed to prevent header blipping/shaking */
+    /* animation: shine 4s infinite ease-in-out; */
+}
+
+/* Header shine animation only on desktop and only on hover for better UX */
+@media (min-width: 769px) {
+    .game-header:hover::before {
+        animation: shine 2s ease-in-out;
+    }
 }
 
 .game-header h1 {
@@ -1438,6 +1494,10 @@ body {
         /* Disable background animation on mobile */
         animation: none;
         background: var(--primary-gradient);
+        /* Webview performance optimizations */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeSpeed;
     }
     
     .game-content {

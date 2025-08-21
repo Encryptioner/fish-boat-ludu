@@ -28,6 +28,10 @@ class FishBoatLaddersGame {
         this.isRolling = false;
         this.canRollAgain = false;
 
+        // Webview compatibility flags
+        this.isWebView = this.detectWebView();
+        this.isLowEndDevice = this.detectLowEndDevice();
+
         // Fish positions (head -> tail) - like snakes, take you down
         this.fishPositions = {
             98: 78, 95: 75, 93: 73, 87: 24, 64: 60,
@@ -114,6 +118,35 @@ class FishBoatLaddersGame {
                 observer.observe(gameBoard);
             }
         }
+    }
+
+    /**
+     * Detect if running in a webview environment
+     * @returns {boolean} True if running in a webview
+     */
+    detectWebView() {
+        const userAgent = navigator.userAgent || '';
+        return /wv|Version.*Chrome|CriOS|FxiOS|EdgiOS/.test(userAgent) ||
+               (window.webkit && window.webkit.messageHandlers !== undefined) ||
+               window.AndroidInterface !== undefined;
+    }
+
+    /**
+     * Detect low-end devices for performance optimization
+     * @returns {boolean} True if device is considered low-end
+     */
+    detectLowEndDevice() {
+        // Check for low RAM indicators
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const lowEndConnection = connection && (connection.saveData || connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
+        
+        // Check for low CPU cores
+        const lowCPU = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
+        
+        // Check for small screen (likely budget device)
+        const smallScreen = window.screen && (window.screen.width * window.screen.height) < 1000000;
+        
+        return lowEndConnection || lowCPU || smallScreen;
     }
 
     /**
@@ -225,6 +258,11 @@ class FishBoatLaddersGame {
      * @returns {boolean} True if the square should be animated
      */
     shouldAnimateSpecialSquare(squarePosition, maxPlayerPosition) {
+        // Disable animations on low-end devices or webviews for better performance
+        if (this.isLowEndDevice || this.isWebView) {
+            return false;
+        }
+        
         // Only animate fish/boats that are within animation range of the furthest player
         // This keeps animation focused on relevant upcoming obstacles/helpers
         return squarePosition >= maxPlayerPosition && 
@@ -617,8 +655,16 @@ class FishBoatLaddersGame {
             
             // Use requestAnimationFrame for smooth animation
             this.scheduleAnimation(() => {
-                // Reduced animation time for mobile
-                const animationTime = window.innerWidth <= 768 ? 200 : 300;
+                // Adaptive animation timing based on device capabilities
+                let animationTime = 300; // Default
+                
+                if (this.isLowEndDevice) {
+                    animationTime = 150; // Very fast for low-end devices
+                } else if (this.isWebView) {
+                    animationTime = 200; // Fast for webviews
+                } else if (window.innerWidth <= 768) {
+                    animationTime = 250; // Mobile optimization
+                }
                 
                 setTimeout(() => {
                     player.position = newPosition;
