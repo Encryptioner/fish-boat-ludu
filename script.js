@@ -435,25 +435,41 @@ class FishBoatLaddersGame {
         // Batch DOM updates for better mobile performance
         this.batchDOMUpdates(() => {
             const board = document.getElementById('game-board');
-            const boardRect = board.getBoundingClientRect();
-
+            
             Object.keys(this.players).forEach(playerId => {
                 const player = this.players[playerId];
                 const targetSquare = document.getElementById(`square-${player.position}`);
                 const piece = player.piece;
 
                 if (targetSquare && piece) {
+                    // Use CSS Grid positioning for more accurate placement
                     const squareRect = targetSquare.getBoundingClientRect();
+                    const boardRect = board.getBoundingClientRect();
+                    
+                    // Get square dimensions for proper centering
+                    const squareWidth = squareRect.width;
+                    const squareHeight = squareRect.height;
+                    
+                    // Calculate center position relative to board
+                    const centerX = squareRect.left - boardRect.left + squareWidth / 2;
+                    const centerY = squareRect.top - boardRect.top + squareHeight / 2;
+                    
+                    // Player offset to prevent overlap - scale with square size
+                    const offsetScale = Math.min(squareWidth, squareHeight) / 60; // Responsive offset
+                    const offsetX = playerId === '1' ? -4 * offsetScale : 4 * offsetScale;
+                    const offsetY = playerId === '1' ? -4 * offsetScale : 4 * offsetScale;
 
-                    // Calculate piece position with slight offset for each player
-                    const offsetX = playerId === '1' ? -5 : 5;
-                    const offsetY = playerId === '1' ? -5 : 5;
+                    // Adaptive piece size for mobile
+                    const pieceRadius = window.innerWidth <= 768 ? 11 : 12; // 22px/2 on mobile, 24px/2 on desktop
+                    
+                    // Final position accounting for piece size
+                    const finalX = centerX - pieceRadius + offsetX;
+                    const finalY = centerY - pieceRadius + offsetY;
 
-                    const left = squareRect.left - boardRect.left + squareRect.width / 2 - 10 + offsetX;
-                    const top = squareRect.top - boardRect.top + squareRect.height / 2 - 10 + offsetY;
-
-                    // Use transform instead of left/top for better performance
-                    piece.style.transform = `translate(${left}px, ${top}px)`;
+                    // Set position using both methods for maximum compatibility
+                    piece.style.left = `${finalX}px`;
+                    piece.style.top = `${finalY}px`;
+                    piece.style.transform = `translate(0, 0)`; // Reset transform
                 }
             });
         });
@@ -526,6 +542,16 @@ class FishBoatLaddersGame {
             this.updatePlayerPositions();
         }, 100);
         window.addEventListener('resize', throttledResize, { passive: true });
+        
+        // Mobile-specific orientation change handling
+        if ('orientation' in screen) {
+            window.addEventListener('orientationchange', () => {
+                // Delay to allow layout to settle after orientation change
+                setTimeout(() => {
+                    this.updatePlayerPositions();
+                }, 200);
+            }, { passive: true });
+        }
 
         // Set up Intersection Observer for performance optimization
         this.setupIntersectionObserver();

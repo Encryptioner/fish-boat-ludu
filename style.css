@@ -911,12 +911,37 @@ body {
     font-weight: bold;
     position: relative;
     overflow: hidden;
+    /* Mobile-friendly subtle glow effect */
+    box-shadow: 0 0 4px rgba(237, 137, 54, 0.4);
+    border: 2px solid rgba(255, 193, 7, 0.6);
 }
 
-/* Finish square glow only on desktop */
+/* Enhanced finish square effects on desktop */
 @media (min-width: 769px) {
     .square.finish {
         animation: finishGlow 3s ease-in-out infinite;
+        box-shadow: 0 0 8px rgba(237, 137, 54, 0.6);
+    }
+}
+
+/* Mobile-optimized finish square animation */
+@media (max-width: 768px) {
+    .square.finish {
+        animation: mobileFinishPulse 2s ease-in-out infinite alternate;
+    }
+}
+
+/* Mobile finish animation - subtle pulse effect */
+@keyframes mobileFinishPulse {
+    0% { 
+        box-shadow: 0 0 4px rgba(237, 137, 54, 0.4);
+        border-color: rgba(255, 193, 7, 0.6);
+        transform: scale(1);
+    }
+    100% { 
+        box-shadow: 0 0 8px rgba(237, 137, 54, 0.7);
+        border-color: rgba(255, 193, 7, 0.9);
+        transform: scale(1.02);
     }
 }
 
@@ -928,7 +953,14 @@ body {
     width: 200%;
     height: 200%;
     background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: shine 3s infinite;
+    /* Shine animation only on desktop to prevent mobile blipping */
+}
+
+/* Desktop shine effect for finish square */
+@media (min-width: 769px) {
+    .square.finish::before {
+        animation: shine 3s infinite;
+    }
 }
 
 @keyframes finishGlow {
@@ -1074,7 +1106,7 @@ body {
     animation: none !important;
 }
 
-/* Player pieces */
+/* Player pieces - optimized for accurate positioning */
 .game-piece {
     position: absolute;
     width: 24px;
@@ -1085,6 +1117,32 @@ body {
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.9);
     animation: playerGlow 3s ease-in-out infinite alternate;
+    /* Ensure consistent positioning across devices */
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    /* Better mobile rendering */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+}
+
+/* Mobile-specific optimizations for player pieces */
+@media (max-width: 768px) {
+    .game-piece {
+        /* Slightly smaller on mobile for better fit */
+        width: 22px;
+        height: 22px;
+        border-width: 2px;
+        /* Faster animation on mobile */
+        transition: all 0.3s ease;
+        /* Reduced glow effect on mobile */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.8);
+    }
+    
+    /* Disable player glow animation on mobile for better performance */
+    .game-piece {
+        animation: none;
+    }
 }
 
 .game-piece.player1 {
