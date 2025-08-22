@@ -19,3 +19,35 @@
 1. Seems AI included service worker
 2. Also added manifests.json to be installed as PWA
 3. Have to test the implementation in mobile device after deployment
+
+
+## Instruction List 2
+
+### Instructions
+1. Update footer. It takes too much space in width. It shouldn't take all the width in desktop as it looks odd with the overall website
+2. In the footer section on second line add social and professional website icons: linkedin, github, website, blog, twitter with href url
+3. I'll update the link later
+4. In the code, you will find todo related to this
+
+### Comments
+1. Added the code but it is not visually good
+
+
+## Instruction List 3
+
+### Instructions
+1. The footer takes too much height
+2. The icons shouldn't be too big
+3. I want a modern sleek design on footer which matches with color and styling of the website
+
+### Comments
+1. The design had less visibility
+
+
+## Instruction List 4
+### Instructions
+1. It’s visibility has reduced. significantly
+
+### Comments
+1. The design is better now
+2. I'll add the links myself

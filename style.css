@@ -1802,72 +1802,148 @@ body {
 
 /* Footer */
 .game-footer {
-    background: linear-gradient(135deg, #2d3748, #4a5568);
-    color: white;
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.9));
+    backdrop-filter: var(--backdrop-blur);
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    color: var(--gray-700);
     text-align: center;
-    padding: 15px 20px;
-    margin-top: 20px;
-    border-top: 3px solid #4CAF50;
+    padding: 12px 16px;
+    margin: 16px auto 0 auto;
+    border-top: 3px solid #667eea;
+    max-width: 600px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg), 0 0 0 1px rgba(102, 126, 234, 0.1);
+}
+
+.footer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
 .footer-content p {
-    margin: 0 0 5px 0;
-    font-size: 0.9em;
-    opacity: 0.9;
-}
-
-.footer-content p:last-child {
-    margin-bottom: 0;
-}
-
-.footer-tagline {
-    font-size: 0.8em !important;
-    opacity: 0.7 !important;
-    font-style: italic;
-    margin-top: 5px !important;
+    margin: 0;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--gray-700);
 }
 
 .footer-content a {
-    color: #68d391;
+    color: #667eea;
     text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    font-weight: 700;
+    transition: all var(--transition-fast);
 }
 
 .footer-content a:hover {
-    color: #9ae6b4;
+    color: #764ba2;
     text-decoration: underline;
-    text-shadow: 0 0 8px rgba(104, 211, 145, 0.5);
+    text-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Social Links */
+.social-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.social-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 1.5px solid rgba(102, 126, 234, 0.3);
+    border-radius: var(--radius-md);
+    color: #667eea;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+    backdrop-filter: var(--backdrop-blur);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.social-links a:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
+    color: #764ba2;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md), 0 0 8px rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.5);
+    text-decoration: none;
+}
+
+.social-links svg {
+    width: 16px;
+    height: 16px;
+    transition: transform var(--transition-fast);
+}
+
+.social-links a:hover svg {
+    transform: scale(1.1);
 }
 
 /* Mobile footer adjustments */
 @media (max-width: 768px) {
     .game-footer {
-        padding: 12px 15px;
-        margin-top: 15px;
-    }
-    
-    .footer-content p {
-        font-size: 0.85em;
-    }
-    
-    .footer-tagline {
-        font-size: 0.75em !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .game-footer {
         padding: 10px 12px;
-        margin-top: 10px;
+        margin-top: 12px;
+        max-width: 95%;
+    }
+    
+    .footer-content {
+        gap: 6px;
     }
     
     .footer-content p {
         font-size: 0.8em;
     }
     
-    .footer-tagline {
-        font-size: 0.7em !important;
+    .social-links {
+        gap: 6px;
+    }
+    
+    .social-links a {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .social-links svg {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-footer {
+        padding: 8px 10px;
+        margin-top: 8px;
+        border-radius: var(--radius-md);
+    }
+    
+    .footer-content {
+        gap: 4px;
+    }
+    
+    .footer-content p {
+        font-size: 0.75em;
+    }
+    
+    .social-links {
+        gap: 4px;
+    }
+    
+    .social-links a {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .social-links svg {
+        width: 12px;
+        height: 12px;
     }
 }
 
