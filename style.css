@@ -1870,3 +1870,47 @@ body {
         font-size: 0.7em !important;
     }
 }
+
+/* Offline Status Indicator */
+.offline-indicator {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #fed7d7, #feb2b2);
+    color: #c53030;
+    text-align: center;
+    padding: 8px;
+    font-weight: bold;
+    font-size: 0.9em;
+    z-index: 10000;
+    border-bottom: 2px solid #e53e3e;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    animation: slideDownOffline 0.3s ease-out;
+}
+
+@keyframes slideDownOffline {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Adjust layout when offline indicator is shown */
+@media (max-width: 768px) {
+    .offline-indicator {
+        font-size: 0.8em;
+        padding: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .offline-indicator {
+        font-size: 0.75em;
+        padding: 5px;
+    }
+}

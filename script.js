@@ -1457,6 +1457,35 @@ class FishBoatLaddersGame {
         menuButton.classList.remove('active');
         menuOverlay.style.display = 'none';
     }
+
+    /**
+     * Check service worker and cache status
+     * Show appropriate notifications about offline capabilities
+     */
+    checkOfflineCapabilities() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                // Check if we have cached files
+                if (registration.active) {
+                    console.log('Offline support: Available');
+                    
+                    // Show notification about offline capabilities (once per session)
+                    if (!sessionStorage.getItem('offlineNotificationShown')) {
+                        setTimeout(() => {
+                            this.showNotification(`
+                                💾 <strong>OFFLINE SUPPORT ENABLED!</strong><br/>
+                                This game now works offline.<br/>
+                                You can play even without internet connection!
+                            `, 5000);
+                            sessionStorage.setItem('offlineNotificationShown', 'true');
+                        }, 2000);
+                    }
+                }
+            }).catch(error => {
+                console.warn('Service worker not ready:', error);
+            });
+        }
+    }
 }
 
 // Global game instance for onclick handlers
@@ -1465,4 +1494,11 @@ let game;
 // Initialize the game when page loads
 document.addEventListener('DOMContentLoaded', () => {
     game = new FishBoatLaddersGame();
+    
+    // Check offline capabilities after game initialization
+    setTimeout(() => {
+        if (game.checkOfflineCapabilities) {
+            game.checkOfflineCapabilities();
+        }
+    }, 1000);
 });

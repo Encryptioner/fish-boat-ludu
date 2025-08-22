@@ -32,6 +32,12 @@ A modern, browser-based variant of the classic Snakes and Ladders board game. In
 - **Webview compatible** for mobile app integration
 - **All key elements visible** without scrolling on mobile devices
 
+### Offline Support
+- **Service worker caching** - game files cached on first visit
+- **Works offline** - play without internet connection after initial load
+- **Auto-updates** - latest version loads when online, cache updated automatically
+- **PWA capabilities** - can be installed as an app on mobile devices
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -81,6 +87,13 @@ npx serve .
 - **Dice**: Tap the dice area at the bottom of the screen
 - **Menu**: Use the hamburger menu (≡) for game options
 - **Responsive**: All features work seamlessly on mobile devices
+
+### Offline Gameplay
+- **First Visit**: Game files are automatically cached in your browser
+- **Offline Play**: Game works completely offline after the first load
+- **Updates**: When online, the latest version is fetched and cache is updated
+- **Status Indicator**: Shows "📡 You're viewing an offline copy" when offline
+- **Installation**: Can be installed as a PWA on mobile devices for app-like experience
 
 ## 🏗️ Technical Architecture
 

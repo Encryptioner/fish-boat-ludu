@@ -43,6 +43,3 @@
 1. The animation is better and blipping of square 100 doesn't look bad now
 2. I've tested it on mobile view of desktop browser so far
 3. Will test in actual device after deployment
-
-
-## Instruction List 4
