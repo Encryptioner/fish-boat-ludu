@@ -12,9 +12,11 @@ This is a Fish & Boat Ladders game - a browser-based variant of the classic Snak
 - `index.html` - Main HTML structure with game board and UI elements
 - `script.js` - Core game logic implemented as `FishBoatLaddersGame` class with modern coding standards
 - `style.css` - Complete styling with responsive design and animations
+- `sw.js` - Service worker for offline caching and PWA functionality
+- `manifest.json` - Web app manifest for PWA capabilities and mobile app compatibility
 - `README.md` - Comprehensive project documentation for users and developers
 - `CLAUDE.md` - Development guidance for AI assistance (this file)
-- `ai-instructions/task-1-initial-setup.md` - Development iteration history through 17 instruction lists
+- `ai-instructions/` - Development iteration history through multiple instruction sets
 
 ### Game Architecture
 The game is implemented using a single JavaScript class `FishBoatLaddersGame` with the following key components:
@@ -90,6 +92,8 @@ npx serve .
 - Webview-compatible for mobile app development
 - Complete game state persistence across browser sessions
 - Sound effects for dice rolling, fish bites, boat rescues, and victories
+- **Offline support** with service worker caching - game works without internet
+- Progressive Web App (PWA) capabilities with app manifest
 
 ## Development Principles
 

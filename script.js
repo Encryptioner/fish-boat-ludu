@@ -28,6 +28,10 @@ class FishBoatLaddersGame {
         this.isRolling = false;
         this.canRollAgain = false;
 
+        // Webview compatibility flags
+        this.isWebView = this.detectWebView();
+        this.isLowEndDevice = this.detectLowEndDevice();
+
         // Fish positions (head -> tail) - like snakes, take you down
         this.fishPositions = {
             98: 78, 95: 75, 93: 73, 87: 24, 64: 60,
@@ -117,7 +121,36 @@ class FishBoatLaddersGame {
     }
 
     /**
-     * Use requestAnimationFrame for smooth animations
+     * Detect if running in a webview environment
+     * @returns {boolean} True if running in a webview
+     */
+    detectWebView() {
+        const userAgent = navigator.userAgent || '';
+        return /wv|Version.*Chrome|CriOS|FxiOS|EdgiOS/.test(userAgent) ||
+               (window.webkit && window.webkit.messageHandlers !== undefined) ||
+               window.AndroidInterface !== undefined;
+    }
+
+    /**
+     * Detect low-end devices for performance optimization
+     * @returns {boolean} True if device is considered low-end
+     */
+    detectLowEndDevice() {
+        // Check for low RAM indicators
+        const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+        const lowEndConnection = connection && (connection.saveData || connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
+        
+        // Check for low CPU cores
+        const lowCPU = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
+        
+        // Check for small screen (likely budget device)
+        const smallScreen = window.screen && (window.screen.width * window.screen.height) < 1000000;
+        
+        return lowEndConnection || lowCPU || smallScreen;
+    }
+
+    /**
+     * Use requestAnimationFrame for smooth animations with mobile optimization
      * @param {Function} callback - Animation callback
      */
     scheduleAnimation(callback) {
@@ -126,6 +159,17 @@ class FishBoatLaddersGame {
         } else {
             return setTimeout(callback, 16); // ~60fps fallback
         }
+    }
+
+    /**
+     * Optimized batch DOM updates for mobile performance
+     * @param {Function} updateFunction - Function containing DOM updates
+     */
+    batchDOMUpdates(updateFunction) {
+        // Use requestAnimationFrame to batch DOM updates
+        this.scheduleAnimation(() => {
+            updateFunction();
+        });
     }
 
     /**
@@ -214,6 +258,11 @@ class FishBoatLaddersGame {
      * @returns {boolean} True if the square should be animated
      */
     shouldAnimateSpecialSquare(squarePosition, maxPlayerPosition) {
+        // Disable animations on low-end devices or webviews for better performance
+        if (this.isLowEndDevice || this.isWebView) {
+            return false;
+        }
+        
         // Only animate fish/boats that are within animation range of the furthest player
         // This keeps animation focused on relevant upcoming obstacles/helpers
         return squarePosition >= maxPlayerPosition && 
@@ -383,25 +432,46 @@ class FishBoatLaddersGame {
     }
 
     updatePlayerPositions() {
-        Object.keys(this.players).forEach(playerId => {
-            const player = this.players[playerId];
-            const targetSquare = document.getElementById(`square-${player.position}`);
-            const piece = player.piece;
+        // Batch DOM updates for better mobile performance
+        this.batchDOMUpdates(() => {
+            const board = document.getElementById('game-board');
+            
+            Object.keys(this.players).forEach(playerId => {
+                const player = this.players[playerId];
+                const targetSquare = document.getElementById(`square-${player.position}`);
+                const piece = player.piece;
 
-            if (targetSquare && piece) {
-                const squareRect = targetSquare.getBoundingClientRect();
-                const boardRect = document.getElementById('game-board').getBoundingClientRect();
+                if (targetSquare && piece) {
+                    // Use CSS Grid positioning for more accurate placement
+                    const squareRect = targetSquare.getBoundingClientRect();
+                    const boardRect = board.getBoundingClientRect();
+                    
+                    // Get square dimensions for proper centering
+                    const squareWidth = squareRect.width;
+                    const squareHeight = squareRect.height;
+                    
+                    // Calculate center position relative to board
+                    const centerX = squareRect.left - boardRect.left + squareWidth / 2;
+                    const centerY = squareRect.top - boardRect.top + squareHeight / 2;
+                    
+                    // Player offset to prevent overlap - scale with square size
+                    const offsetScale = Math.min(squareWidth, squareHeight) / 60; // Responsive offset
+                    const offsetX = playerId === '1' ? -4 * offsetScale : 4 * offsetScale;
+                    const offsetY = playerId === '1' ? -4 * offsetScale : 4 * offsetScale;
 
-                // Calculate piece position with slight offset for each player
-                const offsetX = playerId === '1' ? -5 : 5;
-                const offsetY = playerId === '1' ? -5 : 5;
+                    // Adaptive piece size for mobile
+                    const pieceRadius = window.innerWidth <= 768 ? 11 : 12; // 22px/2 on mobile, 24px/2 on desktop
+                    
+                    // Final position accounting for piece size
+                    const finalX = centerX - pieceRadius + offsetX;
+                    const finalY = centerY - pieceRadius + offsetY;
 
-                const left = squareRect.left - boardRect.left + squareRect.width / 2 - 10 + offsetX;
-                const top = squareRect.top - boardRect.top + squareRect.height / 2 - 10 + offsetY;
-
-                piece.style.left = `${left}px`;
-                piece.style.top = `${top}px`;
-            }
+                    // Set position using both methods for maximum compatibility
+                    piece.style.left = `${finalX}px`;
+                    piece.style.top = `${finalY}px`;
+                    piece.style.transform = `translate(0, 0)`; // Reset transform
+                }
+            });
         });
     }
 
@@ -471,7 +541,17 @@ class FishBoatLaddersGame {
         const throttledResize = FishBoatLaddersGame.throttle(() => {
             this.updatePlayerPositions();
         }, 100);
-        window.addEventListener('resize', throttledResize);
+        window.addEventListener('resize', throttledResize, { passive: true });
+        
+        // Mobile-specific orientation change handling
+        if ('orientation' in screen) {
+            window.addEventListener('orientationchange', () => {
+                // Delay to allow layout to settle after orientation change
+                setTimeout(() => {
+                    this.updatePlayerPositions();
+                }, 200);
+            }, { passive: true });
+        }
 
         // Set up Intersection Observer for performance optimization
         this.setupIntersectionObserver();
@@ -590,7 +670,7 @@ class FishBoatLaddersGame {
     }
 
     /**
-     * Animate player movement with Promise-based timing
+     * Animate player movement with Promise-based timing - optimized for mobile
      * @param {Object} player - Player object
      * @param {number} newPosition - Target position
      * @returns {Promise<void>}
@@ -601,14 +681,28 @@ class FishBoatLaddersGame {
             
             // Use requestAnimationFrame for smooth animation
             this.scheduleAnimation(() => {
+                // Adaptive animation timing based on device capabilities
+                let animationTime = 300; // Default
+                
+                if (this.isLowEndDevice) {
+                    animationTime = 150; // Very fast for low-end devices
+                } else if (this.isWebView) {
+                    animationTime = 200; // Fast for webviews
+                } else if (window.innerWidth <= 768) {
+                    animationTime = 250; // Mobile optimization
+                }
+                
                 setTimeout(() => {
                     player.position = newPosition;
-                    this.updatePlayerPositions();
-                    this.updateDisplay();
-                    this.refreshFishBoatAnimations();
-                    player.piece.classList.remove('moving');
+                    // Batch all updates together
+                    this.batchDOMUpdates(() => {
+                        this.updatePlayerPositions();
+                        this.updateDisplay();
+                        this.refreshFishBoatAnimations();
+                        player.piece.classList.remove('moving');
+                    });
                     resolve();
-                }, 300);
+                }, animationTime);
             });
         });
     }
@@ -1056,7 +1150,7 @@ class FishBoatLaddersGame {
         // Show latest moves first by reversing the array
         const reversedHistory = [...this.gameHistory].reverse();
         
-        reversedHistory.forEach((move, index) => {
+        reversedHistory.forEach((move) => {
             const isSpecial = move.special !== null;
             const specialClass = isSpecial ? ' special' : '';
             
@@ -1191,7 +1285,7 @@ class FishBoatLaddersGame {
         this.audioContext = null;
         try {
             // Use proper AudioContext with fallback for webkit browsers
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            const AudioContextClass = window.AudioContext || window['webkitAudioContext'];
             if (AudioContextClass) {
                 this.audioContext = new AudioContextClass();
             }
@@ -1363,6 +1457,35 @@ class FishBoatLaddersGame {
         menuButton.classList.remove('active');
         menuOverlay.style.display = 'none';
     }
+
+    /**
+     * Check service worker and cache status
+     * Show appropriate notifications about offline capabilities
+     */
+    checkOfflineCapabilities() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                // Check if we have cached files
+                if (registration.active) {
+                    console.log('Offline support: Available');
+                    
+                    // Show notification about offline capabilities (once per session)
+                    if (!sessionStorage.getItem('offlineNotificationShown')) {
+                        setTimeout(() => {
+                            this.showNotification(`
+                                💾 <strong>OFFLINE SUPPORT ENABLED!</strong><br/>
+                                This game now works offline.<br/>
+                                You can play even without internet connection!
+                            `, 5000);
+                            sessionStorage.setItem('offlineNotificationShown', 'true');
+                        }, 2000);
+                    }
+                }
+            }).catch(error => {
+                console.warn('Service worker not ready:', error);
+            });
+        }
+    }
 }
 
 // Global game instance for onclick handlers
@@ -1371,4 +1494,11 @@ let game;
 // Initialize the game when page loads
 document.addEventListener('DOMContentLoaded', () => {
     game = new FishBoatLaddersGame();
+    
+    // Check offline capabilities after game initialization
+    setTimeout(() => {
+        if (game.checkOfflineCapabilities) {
+            game.checkOfflineCapabilities();
+        }
+    }, 1000);
 });

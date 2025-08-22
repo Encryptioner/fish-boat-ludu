@@ -1,0 +1,32 @@
+{
+    "name": "Fish & Boat Ludo Game",
+    "short_name": "Fish & Boat Ludo",
+    "description": "A modern browser-based variant of Snakes and Ladders with fish and boats",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#4CAF50",
+    "theme_color": "#4CAF50",
+    "orientation": "portrait",
+    "scope": "./",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐟%3C/text%3E%3C/svg%3E",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🚤%3C/text%3E%3C/svg%3E",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["games", "entertainment"],
+    "lang": "en",
+    "dir": "ltr",
+    "prefer_related_applications": false,
+    "edge_side_panel": {
+        "preferred_width": 480
+    }
+}
