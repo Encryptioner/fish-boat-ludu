@@ -1,6 +1,6 @@
 {
-    "name": "Fish & Boat Ladders Game",
-    "short_name": "Fish & Boat Ladders",
+    "name": "Fish & Boat Ludo Game",
+    "short_name": "Fish & Boat Ludo",
     "description": "A modern browser-based variant of Snakes and Ladders with fish and boats",
     "start_url": "./",
     "display": "standalone",

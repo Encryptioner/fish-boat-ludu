@@ -1,4 +1,4 @@
-# 🐟 Fish & Boat Ladders Game 🚤
+# 🐟 Fish & Boat Ladders Game (Ludo) 🚤
 
 A modern, browser-based variant of the classic Snakes and Ladders board game. Instead of snakes and ladders, this game features hungry fish that drag players down and helpful boats that carry players up to safety!
 
