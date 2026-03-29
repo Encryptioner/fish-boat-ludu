@@ -27,6 +27,7 @@ class FishBoatLaddersGame {
         this.isGameOver = false;
         this.isRolling = false;
         this.canRollAgain = false;
+        this.gameStartTime = null; // Set on first dice roll of each game
 
         // Webview compatibility flags
         this.isWebView = this.detectWebView();
@@ -565,7 +566,13 @@ class FishBoatLaddersGame {
         if (this.isRolling || this.isGameOver) return;
 
         this.isRolling = true;
-        
+
+        // Track game_started on the very first roll of each game
+        if (!this.gameStartTime) {
+            this.gameStartTime = Date.now();
+            trackEvent({ name: 'game_started' });
+        }
+
         // Play dice rolling sound
         this.playDiceRollSound();
         const dice = document.getElementById('dice');
@@ -596,6 +603,9 @@ class FishBoatLaddersGame {
             mobileDice.textContent = diceEmoji;
             diceValue.textContent = `Rolled: ${roll}`;
             mobileDiceValue.textContent = `Rolled: ${roll}`;
+
+            // Track dice roll
+            trackEvent({ name: 'dice_rolled', params: { value: roll, player_index: this.currentPlayer } });
 
             // Check if player gets another turn (rolled the extra turn number)
             this.canRollAgain = (roll === FishBoatLaddersGame.EXTRA_TURN_ROLL);
@@ -718,6 +728,7 @@ class FishBoatLaddersGame {
         // Check if landed on fish (like snake head)
         if (this.fishPositions[position]) {
             const fishTail = this.fishPositions[position];
+            trackEvent({ name: 'fish_encountered', params: { from_square: position, to_square: fishTail } });
             this.updateGameStatus(`🦈 Oh no! Player ${this.currentPlayer} got caught by a shark! Dragged down to square ${fishTail}!`);
             
             // Show detailed notification
@@ -755,6 +766,7 @@ class FishBoatLaddersGame {
         // Check if landed on boat (like ladder bottom)
         } else if (this.boatPositions[position]) {
             const boatTop = this.boatPositions[position];
+            trackEvent({ name: 'boat_encountered', params: { from_square: position, to_square: boatTop } });
             this.updateGameStatus(`⛵ Great! Player ${this.currentPlayer} found a boat ladder! Sailing up to square ${boatTop}!`);
             
             // Show detailed notification
@@ -821,10 +833,18 @@ class FishBoatLaddersGame {
 
     handleGameWin() {
         this.isGameOver = true;
-        
+
+        // Track win and session length (anonymous — use index, never name)
+        const totalMoves = this.gameHistory.length;
+        trackEvent({ name: 'game_won', params: { winner_index: this.currentPlayer, total_moves: totalMoves } });
+        if (this.gameStartTime) {
+            const durationSeconds = Math.round((Date.now() - this.gameStartTime) / 1000);
+            trackEvent({ name: 'game_duration', params: { duration_seconds: durationSeconds, total_moves: totalMoves } });
+        }
+
         // Play victory sound
         this.playWinSound();
-        
+
         // Update statistics
         this.stats[`player${this.currentPlayer}Wins`]++;
         this.stats.totalGames++;
@@ -906,6 +926,11 @@ class FishBoatLaddersGame {
     }
 
     resetGame() {
+        // Track reset before clearing history
+        if (!this.isGameOver) {
+            trackEvent({ name: 'game_reset', params: { moves_played: this.gameHistory.length } });
+        }
+
         // Reset game state
         this.currentPlayer = 1;
         this.players[1].position = FishBoatLaddersGame.STARTING_SQUARE;
@@ -914,6 +939,7 @@ class FishBoatLaddersGame {
         this.isRolling = false;
         this.canRollAgain = false;
         this.gameHistory = []; // Clear move history
+        this.gameStartTime = null; // Reset timer for next game
 
         // Clear saved game state
         this.clearGameState();
@@ -1445,17 +1471,19 @@ class FishBoatLaddersGame {
     showMobileMenu() {
         const menuButton = document.getElementById('mobile-menu-button');
         const menuOverlay = document.getElementById('mobile-menu-overlay');
-        
+
         menuButton.classList.add('active');
         menuOverlay.style.display = 'block';
+        trackEvent({ name: 'mobile_menu_toggled', params: { opened: true } });
     }
 
     hideMobileMenu() {
         const menuButton = document.getElementById('mobile-menu-button');
         const menuOverlay = document.getElementById('mobile-menu-overlay');
-        
+
         menuButton.classList.remove('active');
         menuOverlay.style.display = 'none';
+        trackEvent({ name: 'mobile_menu_toggled', params: { opened: false } });
     }
 
     /**
