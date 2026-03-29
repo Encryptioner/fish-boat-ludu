@@ -1,157 +1,119 @@
 /**
  * Google Analytics 4 Integration
- * Privacy-first analytics implementation for vanilla JavaScript
+ * Privacy-first, typed analytics implementation for vanilla JavaScript.
+ *
+ * All player references use numeric index (1 or 2) — never player names.
  */
 
-/**
- * Google Analytics Configuration
- */
+// ── Config ──────────────────────────────────────────────────
+
 const GOOGLE_ANALYTICS_CONFIG = {
-  /**
-   * Your Google Analytics 4 Measurement ID
-   * Get it from: https://analytics.google.com/ > Admin > Data Streams
-   */
-  measurementId: 'G-7XCXMKV2S0', // Replace with your GA4 Measurement ID
+  /** GA4 Measurement ID */
+  measurementId: 'G-7XCXMKV2S0',
 
-  /**
-   * Enable/disable Google Analytics
-   * Privacy-first: disabled by default
-   */
-  enabled: false, // Set to true when you add your measurement ID
+  /** Master enable switch — set to false to silence all tracking */
+  enabled: true,
 
-  /**
-   * Track in development environment
-   * Set to true if you want to test analytics locally
-   */
+  /** Set to true to also track on localhost during development */
   trackInDevelopment: false,
 
-  /**
-   * Determine if tracking should be active
-   */
   get shouldTrack() {
     if (!this.enabled) return false;
     if (!this.measurementId || this.measurementId === 'G-XXXXXXXXXX') return false;
-
-    // Check if running on localhost
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isLocalhost =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
     if (isLocalhost && !this.trackInDevelopment) return false;
-
     return true;
   },
 };
 
+// ── Type definition ──────────────────────────────────────────
+
 /**
- * Initialize Google Analytics
- * Call this once at app startup
+ * @typedef {
+ *   | { name: 'game_started' }
+ *   | { name: 'game_won',          params: { winner_index: number, total_moves: number } }
+ *   | { name: 'game_reset',        params: { moves_played: number } }
+ *   | { name: 'game_duration',     params: { duration_seconds: number, total_moves: number } }
+ *   | { name: 'dice_rolled',       params: { value: number, player_index: number } }
+ *   | { name: 'fish_encountered',  params: { from_square: number, to_square: number } }
+ *   | { name: 'boat_encountered',  params: { from_square: number, to_square: number } }
+ *   | { name: 'sound_toggled',     params: { enabled: boolean } }
+ *   | { name: 'mobile_menu_toggled', params: { opened: boolean } }
+ *   | { name: 'pwa_installed' }
+ *   | { name: 'error_occurred',    params: { category: string, action: string, error: string } }
+ * } AnalyticsEvent
+ */
+
+// ── Helpers ──────────────────────────────────────────────────
+
+const EMAIL_PATTERN = /[\w.+-]+@[\w.-]+\.\w+/g;
+
+/**
+ * Strip email addresses from error messages to prevent PII leakage.
+ * @param {string} msg - Raw error message
+ * @returns {string} Sanitized message, max 100 chars
+ */
+function sanitizeError(msg) {
+  return msg.replace(EMAIL_PATTERN, '[email]').slice(0, 100);
+}
+
+// ── Core tracking function ────────────────────────────────────
+
+/**
+ * Send a typed analytics event to Google Analytics.
+ * No-ops gracefully when gtag is unavailable (offline, ad blockers, dev).
+ *
+ * @param {AnalyticsEvent} event
+ */
+function trackEvent(event) {
+  if (!GOOGLE_ANALYTICS_CONFIG.shouldTrack) return;
+  if (typeof window === 'undefined' || !window.gtag) return;
+
+  try {
+    const { name, ...rest } = event;
+    const params = 'params' in rest ? rest.params : undefined;
+    window.gtag('event', name, params);
+  } catch (error) {
+    // Swallow — never let analytics throw into game code
+    console.warn('[Analytics] trackEvent failed:', error);
+  }
+}
+
+// ── GA initialisation ────────────────────────────────────────
+
+/**
+ * Inject the gtag.js script and configure GA4.
+ * Called once on page load.
  */
 function initializeGA() {
   if (!GOOGLE_ANALYTICS_CONFIG.shouldTrack) {
-    console.log('[Google Analytics] Tracking disabled');
+    console.log('[Analytics] Tracking disabled');
     return;
   }
 
   try {
-    // Add gtag.js script
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_CONFIG.measurementId}`;
     document.head.appendChild(script);
 
-    // Initialize dataLayer
     window.dataLayer = window.dataLayer || [];
-    window.gtag = function() {
+    window.gtag = function () {
       window.dataLayer.push(arguments);
     };
 
-    // Configure GA
     window.gtag('js', new Date());
     window.gtag('config', GOOGLE_ANALYTICS_CONFIG.measurementId);
 
-    console.log('[Google Analytics] Initialized successfully with ID:', GOOGLE_ANALYTICS_CONFIG.measurementId);
+    console.log('[Analytics] Initialised with ID:', GOOGLE_ANALYTICS_CONFIG.measurementId);
   } catch (error) {
-    console.error('[Google Analytics] Initialization failed:', error);
+    console.error('[Analytics] Initialisation failed:', error);
   }
 }
 
-/**
- * Track a custom event
- * @param {string} eventName - Name of the event
- * @param {Object} params - Event parameters
- */
-function trackEvent(eventName, params = {}) {
-  if (!GOOGLE_ANALYTICS_CONFIG.shouldTrack) return;
-
-  try {
-    if (window.gtag) {
-      window.gtag('event', eventName, params);
-      console.log('[Google Analytics] Event tracked:', eventName, params);
-    }
-  } catch (error) {
-    console.error('[Google Analytics] Event tracking failed:', error);
-  }
-}
-
-/**
- * Track game start
- */
-function trackGameStart() {
-  trackEvent('game_start', {
-    category: 'Game',
-    action: 'Start Game',
-  });
-}
-
-/**
- * Track game win
- * @param {string} winner - Winner player name
- * @param {number} moves - Number of moves
- */
-function trackGameWin(winner, moves) {
-  trackEvent('game_win', {
-    category: 'Game',
-    winner: winner,
-    moves: moves,
-  });
-}
-
-/**
- * Track dice roll
- * @param {number} value - Dice value
- */
-function trackDiceRoll(value) {
-  trackEvent('dice_roll', {
-    category: 'Game',
-    dice_value: value,
-  });
-}
-
-/**
- * Track fish encounter
- * @param {number} from - Starting position
- * @param {number} to - Ending position
- */
-function trackFishEncounter(from, to) {
-  trackEvent('fish_encounter', {
-    category: 'Game',
-    from: from,
-    to: to,
-  });
-}
-
-/**
- * Track boat encounter
- * @param {number} from - Starting position
- * @param {number} to - Ending position
- */
-function trackBoatEncounter(from, to) {
-  trackEvent('boat_encounter', {
-    category: 'Game',
-    from: from,
-    to: to,
-  });
-}
-
-// Initialize on page load
+// Initialise on page load
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializeGA);
 } else {
