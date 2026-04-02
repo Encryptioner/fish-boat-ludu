@@ -1807,8 +1807,8 @@ body {
     border: 2px solid rgba(102, 126, 234, 0.2);
     color: var(--gray-700);
     text-align: center;
-    padding: 12px 16px;
-    margin: 16px auto 0 auto;
+    padding: 8px 12px;
+    margin: 8px auto 0 auto;
     border-top: 3px solid #667eea;
     max-width: 600px;
     border-radius: var(--radius-lg);
@@ -1817,9 +1817,39 @@ body {
 
 .footer-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    flex-wrap: wrap;
+}
+
+.footer-separator {
+    color: var(--gray-400);
+    font-size: 0.8em;
+}
+
+.footer-oss {
+    font-size: 10px;
+    color: var(--gray-500);
+    margin: 4px 0 0 0;
+}
+
+.support-link {
+    color: #92400E;
+    background: rgba(245, 158, 11, 0.12);
+    border-radius: 4px;
+    padding: 1px 6px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.support-link:hover {
+    color: #78350F;
+    background: rgba(245, 158, 11, 0.22);
+    text-decoration: none;
 }
 
 .footer-content p {
@@ -1842,6 +1872,7 @@ body {
     text-shadow: 0 0 8px rgba(102, 126, 234, 0.3);
 }
 
+
 /* Social Links */
 .social-links {
     display: flex;
@@ -1855,8 +1886,8 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
     border: 1.5px solid rgba(102, 126, 234, 0.3);
     border-radius: var(--radius-md);
@@ -1877,8 +1908,8 @@ body {
 }
 
 .social-links svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     transition: transform var(--transition-fast);
 }
 
@@ -1889,61 +1920,57 @@ body {
 /* Mobile footer adjustments */
 @media (max-width: 768px) {
     .game-footer {
-        padding: 10px 12px;
-        margin-top: 12px;
+        padding: 8px 10px;
+        margin-top: 8px;
         max-width: 95%;
     }
-    
+
     .footer-content {
-        gap: 6px;
+        gap: 4px;
     }
-    
+
     .footer-content p {
-        font-size: 0.8em;
+        font-size: 0.75em;
     }
-    
+
     .social-links {
-        gap: 6px;
+        gap: 4px;
     }
-    
+
     .social-links a {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
     }
-    
+
     .social-links svg {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
     }
 }
 
 @media (max-width: 480px) {
     .game-footer {
-        padding: 8px 10px;
-        margin-top: 8px;
+        padding: 6px 8px;
+        margin-top: 6px;
         border-radius: var(--radius-md);
     }
-    
-    .footer-content {
-        gap: 4px;
-    }
-    
+
     .footer-content p {
-        font-size: 0.75em;
+        font-size: 0.7em;
     }
-    
-    .social-links {
-        gap: 4px;
-    }
-    
+
     .social-links a {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
     }
-    
+
     .social-links svg {
-        width: 12px;
-        height: 12px;
+        width: 11px;
+        height: 11px;
+    }
+
+    .support-link {
+        font-size: 11px;
     }
 }
 
