@@ -193,3 +193,11 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 **Enjoy the game! 🎮** Cast off with the boats and avoid the hungry fish in this exciting nautical adventure!
+
+---
+
+## Support
+
+If you find my work useful, consider supporting it:
+
+[![SupportKori](https://img.shields.io/badge/SupportKori-☕-FFDD00?style=flat-square)](https://www.supportkori.com/mirmursalinankur)
